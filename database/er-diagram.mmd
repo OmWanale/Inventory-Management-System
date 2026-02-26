@@ -1,0 +1,170 @@
+erDiagram
+    USERS {
+        INT id PK
+        VARCHAR username UK
+        VARCHAR email UK
+        VARCHAR password
+        VARCHAR full_name
+        ENUM role "admin/staff"
+        VARCHAR phone
+        BOOLEAN is_active
+        DATETIME last_login
+    }
+
+    VENDORS {
+        INT id PK
+        VARCHAR name
+        VARCHAR contact_person
+        VARCHAR phone
+        VARCHAR email
+        TEXT address
+        VARCHAR gst_number
+        ENUM status "active/inactive"
+    }
+
+    CUSTOMERS {
+        INT id PK
+        VARCHAR name
+        VARCHAR phone
+        VARCHAR email
+        TEXT billing_address
+        TEXT shipping_address
+        VARCHAR gst_number
+        DECIMAL credit_limit
+        DECIMAL outstanding_balance
+        ENUM status "active/inactive"
+    }
+
+    PRODUCTS {
+        INT id PK
+        VARCHAR sku UK
+        VARCHAR name
+        VARCHAR category
+        VARCHAR brand
+        VARCHAR unit
+        INT quantity
+        DECIMAL purchase_price
+        DECIMAL selling_price
+        INT reorder_level
+        INT max_stock
+        INT vendor_id FK
+        VARCHAR barcode
+        BOOLEAN is_active
+    }
+
+    PURCHASES {
+        INT id PK
+        VARCHAR purchase_number UK
+        INT vendor_id FK
+        DATE purchase_date
+        DATE payment_due_date
+        DECIMAL subtotal
+        DECIMAL tax_amount
+        DECIMAL discount_amount
+        DECIMAL total_amount
+        DECIMAL amount_paid
+        ENUM payment_status "pending/partial/paid"
+        ENUM order_status "draft/ordered/received"
+        INT received_by FK
+    }
+
+    PURCHASE_ITEMS {
+        INT id PK
+        INT purchase_id FK
+        INT product_id FK
+        INT quantity
+        DECIMAL purchase_price
+        DECIMAL total
+    }
+
+    PURCHASE_PAYMENTS {
+        INT id PK
+        INT purchase_id FK
+        DATE payment_date
+        DECIMAL amount
+        ENUM payment_mode "cash/bank/upi/cheque"
+        VARCHAR reference_no
+        INT created_by FK
+    }
+
+    INVOICES {
+        INT id PK
+        VARCHAR invoice_number UK
+        INT customer_id FK
+        DATE invoice_date
+        DATE due_date
+        DECIMAL subtotal
+        DECIMAL tax_amount
+        DECIMAL discount_amount
+        DECIMAL total_amount
+        DECIMAL amount_paid
+        ENUM payment_mode "cash/upi/card/bank/credit"
+        ENUM payment_status "pending/partial/paid"
+        INT created_by FK
+    }
+
+    INVOICE_ITEMS {
+        INT id PK
+        INT invoice_id FK
+        INT product_id FK
+        INT quantity
+        DECIMAL unit_price
+        DECIMAL discount
+        DECIMAL total
+    }
+
+    INVOICE_PAYMENTS {
+        INT id PK
+        INT invoice_id FK
+        DATE payment_date
+        DECIMAL amount
+        ENUM payment_mode "cash/bank/upi/cheque"
+        VARCHAR reference_no
+        INT created_by FK
+    }
+
+    INVENTORY_MOVEMENTS {
+        INT id PK
+        INT product_id FK
+        ENUM movement_type "in/out/adjust/return"
+        INT quantity
+        ENUM reference_type "purchase/invoice/adjust"
+        INT reference_id
+        INT previous_quantity
+        INT new_quantity
+        INT created_by FK
+    }
+
+    AUDIT_LOGS {
+        INT id PK
+        INT user_id FK
+        VARCHAR action
+        VARCHAR entity_type
+        INT entity_id
+        JSON old_values
+        JSON new_values
+    }
+
+    SYSTEM_CONFIG {
+        INT id PK
+        VARCHAR config_key UK
+        TEXT config_value
+        VARCHAR description
+    }
+
+    VENDORS ||--o{ PRODUCTS : "supplies"
+    VENDORS ||--o{ PURCHASES : "sells to"
+    CUSTOMERS ||--o{ INVOICES : "buys from"
+    USERS ||--o{ PURCHASES : "receives"
+    USERS ||--o{ INVOICES : "creates"
+    USERS ||--o{ INVENTORY_MOVEMENTS : "performs"
+    USERS ||--o{ AUDIT_LOGS : "generates"
+    USERS ||--o{ PURCHASE_PAYMENTS : "records"
+    USERS ||--o{ INVOICE_PAYMENTS : "records"
+    PURCHASES ||--|{ PURCHASE_ITEMS : "contains"
+    PURCHASES ||--o{ PURCHASE_PAYMENTS : "paid via"
+    PRODUCTS ||--o{ PURCHASE_ITEMS : "included in"
+    PRODUCTS ||--o{ INVOICE_ITEMS : "included in"
+    PRODUCTS ||--o{ INVENTORY_MOVEMENTS : "tracked by"
+    INVOICES ||--|{ INVOICE_ITEMS : "contains"
+    INVOICES ||--o{ INVOICE_PAYMENTS : "paid via"

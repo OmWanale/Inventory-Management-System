@@ -64,9 +64,11 @@ function App() {
             <Route path="purchases" element={<Purchases />} />
             <Route path="purchases/new" element={<PurchaseForm />} />
             <Route path="purchases/:id" element={<PurchaseView />} />
+            <Route path="purchases/:id/edit" element={<PurchaseForm />} />
             <Route path="invoices" element={<Invoices />} />
             <Route path="invoices/new" element={<InvoiceForm />} />
             <Route path="invoices/:id" element={<InvoiceView />} />
+            <Route path="invoices/:id/edit" element={<InvoiceForm />} />
             <Route path="reports" element={<Reports />} />
             <Route path="users" element={<Users />} />
             <Route path="users/new" element={<UserForm />} />

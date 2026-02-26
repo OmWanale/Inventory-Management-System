@@ -1,0 +1,357 @@
+digraph RelationalSchema {
+    // Global settings
+    graph [
+        rankdir=LR,
+        splines=true,
+        nodesep=0.6,
+        ranksep=1.8,
+        bgcolor="white",
+        fontname="Helvetica",
+        label=<
+        <TABLE BORDER="0" CELLBORDER="0" CELLSPACING="4">
+            <TR><TD><FONT POINT-SIZE="26" COLOR="#1e293b"><B>Mapping ER/EER to Relational Schema Model</B></FONT></TD></TR>
+            <TR><TD><FONT POINT-SIZE="14" COLOR="#64748b">Inventory Management System — All entities, generalizations &amp; aggregations mapped to relations</FONT></TD></TR>
+        </TABLE>>,
+        labelloc=t,
+        pad="0.5,0.5"
+    ];
+    node [fontname="Helvetica", fontsize=10, shape=plaintext];
+    edge [fontname="Helvetica", fontsize=9, color="#64748b", arrowsize=0.8];
+
+
+    // =====================================================================
+    //  MAPPING RULES REFERENCE (top-left)
+    // =====================================================================
+    RULES [label=<
+    <TABLE BORDER="2" CELLBORDER="0" CELLSPACING="0" CELLPADDING="6" COLOR="#334155" BGCOLOR="#f8fafc" STYLE="rounded">
+        <TR><TD COLSPAN="2" BGCOLOR="#1e293b"><FONT COLOR="white" POINT-SIZE="12"><B>EER → Relational Mapping Rules Applied</B></FONT></TD></TR>
+        <TR><TD ALIGN="LEFT" BGCOLOR="#f1f5f9"><B>Rule 1</B></TD><TD ALIGN="LEFT" BGCOLOR="#f1f5f9">Strong entity → own relation (table)</TD></TR>
+        <TR><TD ALIGN="LEFT"><B>Rule 2</B></TD><TD ALIGN="LEFT">Composite attributes → flatten to columns</TD></TR>
+        <TR><TD ALIGN="LEFT" BGCOLOR="#f1f5f9"><B>Rule 3</B></TD><TD ALIGN="LEFT" BGCOLOR="#f1f5f9">1:N relationship → FK in N-side table</TD></TR>
+        <TR><TD ALIGN="LEFT"><B>Rule 4</B></TD><TD ALIGN="LEFT">M:N relationship → junction/associative table</TD></TR>
+        <TR><TD ALIGN="LEFT" BGCOLOR="#f1f5f9"><B>Rule 5</B></TD><TD ALIGN="LEFT" BGCOLOR="#f1f5f9">Multivalued attribute → separate relation</TD></TR>
+        <TR><TD ALIGN="LEFT"><B>Rule 6</B></TD><TD ALIGN="LEFT">Total, Disjoint specialization → merge into superclass (Option A)</TD></TR>
+        <TR><TD ALIGN="LEFT" BGCOLOR="#f1f5f9"><B>Rule 7</B></TD><TD ALIGN="LEFT" BGCOLOR="#f1f5f9">Partial specialization → type discriminator column (role/status)</TD></TR>
+        <TR><TD ALIGN="LEFT"><B>Rule 8</B></TD><TD ALIGN="LEFT">Aggregation → associative entity becomes own relation with FKs</TD></TR>
+        <TR><TD ALIGN="LEFT" BGCOLOR="#f1f5f9"><B>Rule 9</B></TD><TD ALIGN="LEFT" BGCOLOR="#f1f5f9">Generalization with shared schema → merge subclasses to one table</TD></TR>
+        <TR><TD ALIGN="LEFT" BGCOLOR="#e2e8f0" COLSPAN="2"><FONT COLOR="#475569"><I>PK = Primary Key, FK = Foreign Key, UK = Unique Key</I></FONT></TD></TR>
+    </TABLE>>];
+
+
+    // =====================================================================
+    //  SECTION 1: USER SPECIALIZATION MAPPING
+    // =====================================================================
+    SEC1_TITLE [label=<
+    <TABLE BORDER="0" CELLBORDER="0"><TR><TD BGCOLOR="#2563eb" STYLE="rounded"><FONT COLOR="white" POINT-SIZE="13"><B>  1. User Specialization (ISA: Admin / Staff)  </B></FONT></TD></TR>
+    <TR><TD><FONT POINT-SIZE="10" COLOR="#2563eb"><B>Rule 6 (Option A):</B> Total disjoint ISA → Merge subclass attributes into superclass using discriminator column <B>role</B></FONT></TD></TR></TABLE>>];
+
+    USERS_TABLE [label=<
+    <TABLE BORDER="2" CELLBORDER="1" CELLSPACING="0" CELLPADDING="5" COLOR="#2563eb" BGCOLOR="#ffffff">
+        <TR><TD COLSPAN="4" BGCOLOR="#2563eb"><FONT COLOR="white"><B>users</B></FONT></TD></TR>
+        <TR><TD BGCOLOR="#dbeafe"><B>Column</B></TD><TD BGCOLOR="#dbeafe"><B>Type</B></TD><TD BGCOLOR="#dbeafe"><B>Key</B></TD><TD BGCOLOR="#dbeafe"><B>Mapping</B></TD></TR>
+        <TR><TD ALIGN="LEFT">id</TD><TD>INT AUTO_INC</TD><TD><FONT COLOR="#dc2626"><B>PK</B></FONT></TD><TD><FONT COLOR="#64748b">Rule 1</FONT></TD></TR>
+        <TR><TD ALIGN="LEFT">username</TD><TD>VARCHAR(50)</TD><TD><FONT COLOR="#2563eb">UK</FONT></TD><TD><FONT COLOR="#64748b">Rule 1</FONT></TD></TR>
+        <TR><TD ALIGN="LEFT">email</TD><TD>VARCHAR(100)</TD><TD><FONT COLOR="#2563eb">UK</FONT></TD><TD><FONT COLOR="#64748b">Rule 1</FONT></TD></TR>
+        <TR><TD ALIGN="LEFT">password</TD><TD>VARCHAR(255)</TD><TD></TD><TD><FONT COLOR="#64748b">Rule 1</FONT></TD></TR>
+        <TR><TD ALIGN="LEFT">full_name</TD><TD>VARCHAR(100)</TD><TD></TD><TD><FONT COLOR="#64748b">Rule 1</FONT></TD></TR>
+        <TR><TD ALIGN="LEFT" BGCOLOR="#fef3c7"><B>role</B></TD><TD BGCOLOR="#fef3c7">ENUM('admin','staff')</TD><TD BGCOLOR="#fef3c7"><B>DISC</B></TD><TD BGCOLOR="#fef3c7"><FONT COLOR="#b45309"><B>Rule 6 — Discriminator</B></FONT></TD></TR>
+        <TR><TD ALIGN="LEFT">phone</TD><TD>VARCHAR(20)</TD><TD></TD><TD><FONT COLOR="#64748b">Rule 1</FONT></TD></TR>
+        <TR><TD ALIGN="LEFT">avatar</TD><TD>VARCHAR(255)</TD><TD></TD><TD><FONT COLOR="#64748b">Rule 1</FONT></TD></TR>
+        <TR><TD ALIGN="LEFT">is_active</TD><TD>BOOLEAN</TD><TD></TD><TD><FONT COLOR="#64748b">Rule 1</FONT></TD></TR>
+        <TR><TD ALIGN="LEFT">last_login</TD><TD>DATETIME</TD><TD></TD><TD><FONT COLOR="#64748b">Rule 1</FONT></TD></TR>
+        <TR><TD ALIGN="LEFT">created_at</TD><TD>TIMESTAMP</TD><TD></TD><TD><FONT COLOR="#64748b">Rule 1</FONT></TD></TR>
+        <TR><TD ALIGN="LEFT">updated_at</TD><TD>TIMESTAMP</TD><TD></TD><TD><FONT COLOR="#64748b">Rule 1</FONT></TD></TR>
+    </TABLE>>];
+
+
+    // =====================================================================
+    //  SECTION 2: PARTY GENERALIZATION MAPPING
+    // =====================================================================
+    SEC2_TITLE [label=<
+    <TABLE BORDER="0" CELLBORDER="0"><TR><TD BGCOLOR="#16a34a" STYLE="rounded"><FONT COLOR="white" POINT-SIZE="13"><B>  2. Party Generalization (Vendors &amp; Customers)  </B></FONT></TD></TR>
+    <TR><TD><FONT POINT-SIZE="10" COLOR="#16a34a"><B>Rule 9 (Option B):</B> Partial, disjoint → Create separate relation for each subclass; superclass attributes replicated. No PARTY table needed.</FONT></TD></TR></TABLE>>];
+
+    VENDORS_TABLE [label=<
+    <TABLE BORDER="2" CELLBORDER="1" CELLSPACING="0" CELLPADDING="5" COLOR="#16a34a" BGCOLOR="#ffffff">
+        <TR><TD COLSPAN="4" BGCOLOR="#16a34a"><FONT COLOR="white"><B>vendors</B></FONT></TD></TR>
+        <TR><TD BGCOLOR="#dcfce7"><B>Column</B></TD><TD BGCOLOR="#dcfce7"><B>Type</B></TD><TD BGCOLOR="#dcfce7"><B>Key</B></TD><TD BGCOLOR="#dcfce7"><B>Mapping</B></TD></TR>
+        <TR><TD ALIGN="LEFT">id</TD><TD>INT AUTO_INC</TD><TD><FONT COLOR="#dc2626"><B>PK</B></FONT></TD><TD><FONT COLOR="#64748b">Rule 1</FONT></TD></TR>
+        <TR><TD ALIGN="LEFT" BGCOLOR="#f0fdf4">name</TD><TD BGCOLOR="#f0fdf4">VARCHAR(100)</TD><TD BGCOLOR="#f0fdf4"></TD><TD BGCOLOR="#f0fdf4"><FONT COLOR="#16a34a"><B>From PARTY superclass</B></FONT></TD></TR>
+        <TR><TD ALIGN="LEFT">contact_person</TD><TD>VARCHAR(100)</TD><TD></TD><TD><FONT COLOR="#64748b">Vendor-specific</FONT></TD></TR>
+        <TR><TD ALIGN="LEFT" BGCOLOR="#f0fdf4">phone</TD><TD BGCOLOR="#f0fdf4">VARCHAR(20)</TD><TD BGCOLOR="#f0fdf4"></TD><TD BGCOLOR="#f0fdf4"><FONT COLOR="#16a34a"><B>From PARTY</B></FONT></TD></TR>
+        <TR><TD ALIGN="LEFT" BGCOLOR="#f0fdf4">email</TD><TD BGCOLOR="#f0fdf4">VARCHAR(100)</TD><TD BGCOLOR="#f0fdf4"></TD><TD BGCOLOR="#f0fdf4"><FONT COLOR="#16a34a"><B>From PARTY</B></FONT></TD></TR>
+        <TR><TD ALIGN="LEFT" BGCOLOR="#f0fdf4">address, city, state, postal_code, country</TD><TD BGCOLOR="#f0fdf4">TEXT/VARCHAR</TD><TD BGCOLOR="#f0fdf4"></TD><TD BGCOLOR="#f0fdf4"><FONT COLOR="#16a34a"><B>From PARTY (Rule 2: flattened)</B></FONT></TD></TR>
+        <TR><TD ALIGN="LEFT" BGCOLOR="#f0fdf4">gst_number, tax_id</TD><TD BGCOLOR="#f0fdf4">VARCHAR</TD><TD BGCOLOR="#f0fdf4"></TD><TD BGCOLOR="#f0fdf4"><FONT COLOR="#16a34a"><B>From PARTY</B></FONT></TD></TR>
+        <TR><TD ALIGN="LEFT">payment_terms</TD><TD>VARCHAR(100)</TD><TD></TD><TD><FONT COLOR="#64748b">Vendor-specific</FONT></TD></TR>
+        <TR><TD ALIGN="LEFT" BGCOLOR="#f0fdf4">status</TD><TD BGCOLOR="#f0fdf4">ENUM</TD><TD BGCOLOR="#f0fdf4"></TD><TD BGCOLOR="#f0fdf4"><FONT COLOR="#16a34a"><B>From PARTY</B></FONT></TD></TR>
+        <TR><TD ALIGN="LEFT">notes</TD><TD>TEXT</TD><TD></TD><TD><FONT COLOR="#64748b">Rule 1</FONT></TD></TR>
+    </TABLE>>];
+
+    CUSTOMERS_TABLE [label=<
+    <TABLE BORDER="2" CELLBORDER="1" CELLSPACING="0" CELLPADDING="5" COLOR="#16a34a" BGCOLOR="#ffffff">
+        <TR><TD COLSPAN="4" BGCOLOR="#16a34a"><FONT COLOR="white"><B>customers</B></FONT></TD></TR>
+        <TR><TD BGCOLOR="#dcfce7"><B>Column</B></TD><TD BGCOLOR="#dcfce7"><B>Type</B></TD><TD BGCOLOR="#dcfce7"><B>Key</B></TD><TD BGCOLOR="#dcfce7"><B>Mapping</B></TD></TR>
+        <TR><TD ALIGN="LEFT">id</TD><TD>INT AUTO_INC</TD><TD><FONT COLOR="#dc2626"><B>PK</B></FONT></TD><TD><FONT COLOR="#64748b">Rule 1</FONT></TD></TR>
+        <TR><TD ALIGN="LEFT" BGCOLOR="#f0fdf4">name</TD><TD BGCOLOR="#f0fdf4">VARCHAR(100)</TD><TD BGCOLOR="#f0fdf4"></TD><TD BGCOLOR="#f0fdf4"><FONT COLOR="#16a34a"><B>From PARTY superclass</B></FONT></TD></TR>
+        <TR><TD ALIGN="LEFT" BGCOLOR="#f0fdf4">phone</TD><TD BGCOLOR="#f0fdf4">VARCHAR(20)</TD><TD BGCOLOR="#f0fdf4"></TD><TD BGCOLOR="#f0fdf4"><FONT COLOR="#16a34a"><B>From PARTY</B></FONT></TD></TR>
+        <TR><TD ALIGN="LEFT" BGCOLOR="#f0fdf4">email</TD><TD BGCOLOR="#f0fdf4">VARCHAR(100)</TD><TD BGCOLOR="#f0fdf4"></TD><TD BGCOLOR="#f0fdf4"><FONT COLOR="#16a34a"><B>From PARTY</B></FONT></TD></TR>
+        <TR><TD ALIGN="LEFT">billing_address</TD><TD>TEXT</TD><TD></TD><TD><FONT COLOR="#64748b">Customer-specific</FONT></TD></TR>
+        <TR><TD ALIGN="LEFT">shipping_address</TD><TD>TEXT</TD><TD></TD><TD><FONT COLOR="#64748b">Customer-specific</FONT></TD></TR>
+        <TR><TD ALIGN="LEFT" BGCOLOR="#f0fdf4">city, state, postal_code, country</TD><TD BGCOLOR="#f0fdf4">VARCHAR</TD><TD BGCOLOR="#f0fdf4"></TD><TD BGCOLOR="#f0fdf4"><FONT COLOR="#16a34a"><B>From PARTY (Rule 2)</B></FONT></TD></TR>
+        <TR><TD ALIGN="LEFT" BGCOLOR="#f0fdf4">gst_number, tax_id</TD><TD BGCOLOR="#f0fdf4">VARCHAR</TD><TD BGCOLOR="#f0fdf4"></TD><TD BGCOLOR="#f0fdf4"><FONT COLOR="#16a34a"><B>From PARTY</B></FONT></TD></TR>
+        <TR><TD ALIGN="LEFT">credit_limit</TD><TD>DECIMAL(12,2)</TD><TD></TD><TD><FONT COLOR="#64748b">Customer-specific</FONT></TD></TR>
+        <TR><TD ALIGN="LEFT">outstanding_balance</TD><TD>DECIMAL(12,2)</TD><TD></TD><TD><FONT COLOR="#64748b">Customer-specific</FONT></TD></TR>
+        <TR><TD ALIGN="LEFT" BGCOLOR="#f0fdf4">status</TD><TD BGCOLOR="#f0fdf4">ENUM</TD><TD BGCOLOR="#f0fdf4"></TD><TD BGCOLOR="#f0fdf4"><FONT COLOR="#16a34a"><B>From PARTY</B></FONT></TD></TR>
+    </TABLE>>];
+
+
+    // =====================================================================
+    //  SECTION 3: PRODUCTS (Strong Entity)
+    // =====================================================================
+    SEC3_TITLE [label=<
+    <TABLE BORDER="0" CELLBORDER="0"><TR><TD BGCOLOR="#d97706" STYLE="rounded"><FONT COLOR="white" POINT-SIZE="13"><B>  3. Products (Strong Entity)  </B></FONT></TD></TR>
+    <TR><TD><FONT POINT-SIZE="10" COLOR="#d97706"><B>Rule 1 + Rule 3:</B> Strong entity → own table. 1:N "Supplies" relationship → vendor_id FK in products.</FONT></TD></TR></TABLE>>];
+
+    PRODUCTS_TABLE [label=<
+    <TABLE BORDER="2" CELLBORDER="1" CELLSPACING="0" CELLPADDING="5" COLOR="#d97706" BGCOLOR="#ffffff">
+        <TR><TD COLSPAN="4" BGCOLOR="#d97706"><FONT COLOR="white"><B>products</B></FONT></TD></TR>
+        <TR><TD BGCOLOR="#fef3c7"><B>Column</B></TD><TD BGCOLOR="#fef3c7"><B>Type</B></TD><TD BGCOLOR="#fef3c7"><B>Key</B></TD><TD BGCOLOR="#fef3c7"><B>Mapping</B></TD></TR>
+        <TR><TD ALIGN="LEFT">id</TD><TD>INT AUTO_INC</TD><TD><FONT COLOR="#dc2626"><B>PK</B></FONT></TD><TD><FONT COLOR="#64748b">Rule 1</FONT></TD></TR>
+        <TR><TD ALIGN="LEFT">sku</TD><TD>VARCHAR(50)</TD><TD><FONT COLOR="#2563eb">UK</FONT></TD><TD><FONT COLOR="#64748b">Rule 1</FONT></TD></TR>
+        <TR><TD ALIGN="LEFT">name</TD><TD>VARCHAR(150)</TD><TD></TD><TD><FONT COLOR="#64748b">Rule 1</FONT></TD></TR>
+        <TR><TD ALIGN="LEFT">description</TD><TD>TEXT</TD><TD></TD><TD><FONT COLOR="#64748b">Rule 1</FONT></TD></TR>
+        <TR><TD ALIGN="LEFT">category, brand</TD><TD>VARCHAR(50)</TD><TD></TD><TD><FONT COLOR="#64748b">Rule 1</FONT></TD></TR>
+        <TR><TD ALIGN="LEFT">unit</TD><TD>VARCHAR(20)</TD><TD></TD><TD><FONT COLOR="#64748b">Rule 1</FONT></TD></TR>
+        <TR><TD ALIGN="LEFT">quantity</TD><TD>INT</TD><TD></TD><TD><FONT COLOR="#64748b">Derived (from movements)</FONT></TD></TR>
+        <TR><TD ALIGN="LEFT">purchase_price, selling_price</TD><TD>DECIMAL(10,2)</TD><TD></TD><TD><FONT COLOR="#64748b">Rule 1</FONT></TD></TR>
+        <TR><TD ALIGN="LEFT">reorder_level, max_stock</TD><TD>INT</TD><TD></TD><TD><FONT COLOR="#64748b">Rule 1</FONT></TD></TR>
+        <TR><TD ALIGN="LEFT" BGCOLOR="#fef3c7"><B>vendor_id</B></TD><TD BGCOLOR="#fef3c7">INT</TD><TD BGCOLOR="#fef3c7"><FONT COLOR="#ea580c"><B>FK → vendors(id)</B></FONT></TD><TD BGCOLOR="#fef3c7"><FONT COLOR="#ea580c"><B>Rule 3 — 1:N "Supplies"</B></FONT></TD></TR>
+        <TR><TD ALIGN="LEFT">barcode</TD><TD>VARCHAR(50)</TD><TD></TD><TD><FONT COLOR="#64748b">Rule 1</FONT></TD></TR>
+        <TR><TD ALIGN="LEFT">is_active</TD><TD>BOOLEAN</TD><TD></TD><TD><FONT COLOR="#64748b">Rule 1</FONT></TD></TR>
+    </TABLE>>];
+
+
+    // =====================================================================
+    //  SECTION 4: PURCHASE AGGREGATION MAPPING
+    // =====================================================================
+    SEC4_TITLE [label=<
+    <TABLE BORDER="0" CELLBORDER="0"><TR><TD BGCOLOR="#db2777" STYLE="rounded"><FONT COLOR="white" POINT-SIZE="13"><B>  4. Purchase Aggregation  </B></FONT></TD></TR>
+    <TR><TD><FONT POINT-SIZE="10" COLOR="#db2777"><B>Rule 1 + Rule 3 + Rule 8:</B> Aggregation → purchases &amp; purchase_items as separate relations. FKs link them.</FONT></TD></TR></TABLE>>];
+
+    PURCHASES_TABLE [label=<
+    <TABLE BORDER="2" CELLBORDER="1" CELLSPACING="0" CELLPADDING="5" COLOR="#db2777" BGCOLOR="#ffffff">
+        <TR><TD COLSPAN="4" BGCOLOR="#db2777"><FONT COLOR="white"><B>purchases</B></FONT></TD></TR>
+        <TR><TD BGCOLOR="#fce7f3"><B>Column</B></TD><TD BGCOLOR="#fce7f3"><B>Type</B></TD><TD BGCOLOR="#fce7f3"><B>Key</B></TD><TD BGCOLOR="#fce7f3"><B>Mapping</B></TD></TR>
+        <TR><TD ALIGN="LEFT">id</TD><TD>INT AUTO_INC</TD><TD><FONT COLOR="#dc2626"><B>PK</B></FONT></TD><TD><FONT COLOR="#64748b">Rule 1</FONT></TD></TR>
+        <TR><TD ALIGN="LEFT">purchase_number</TD><TD>VARCHAR(50)</TD><TD><FONT COLOR="#2563eb">UK</FONT></TD><TD><FONT COLOR="#64748b">Rule 1</FONT></TD></TR>
+        <TR><TD ALIGN="LEFT" BGCOLOR="#fce7f3"><B>vendor_id</B></TD><TD BGCOLOR="#fce7f3">INT NOT NULL</TD><TD BGCOLOR="#fce7f3"><FONT COLOR="#ea580c"><B>FK → vendors(id)</B></FONT></TD><TD BGCOLOR="#fce7f3"><FONT COLOR="#ea580c"><B>Rule 3 — 1:N "Sells To"</B></FONT></TD></TR>
+        <TR><TD ALIGN="LEFT">purchase_date</TD><TD>DATE</TD><TD></TD><TD><FONT COLOR="#64748b">Rule 1</FONT></TD></TR>
+        <TR><TD ALIGN="LEFT">payment_due_date</TD><TD>DATE</TD><TD></TD><TD><FONT COLOR="#64748b">Migration V2</FONT></TD></TR>
+        <TR><TD ALIGN="LEFT">subtotal, tax, discount, shipping</TD><TD>DECIMAL</TD><TD></TD><TD><FONT COLOR="#64748b">Rule 1</FONT></TD></TR>
+        <TR><TD ALIGN="LEFT">total_amount, amount_paid</TD><TD>DECIMAL(12,2)</TD><TD></TD><TD><FONT COLOR="#64748b">Rule 1</FONT></TD></TR>
+        <TR><TD ALIGN="LEFT">payment_status</TD><TD>ENUM</TD><TD></TD><TD><FONT COLOR="#64748b">Rule 1</FONT></TD></TR>
+        <TR><TD ALIGN="LEFT">order_status</TD><TD>ENUM</TD><TD></TD><TD><FONT COLOR="#64748b">Migration V2</FONT></TD></TR>
+        <TR><TD ALIGN="LEFT" BGCOLOR="#fce7f3"><B>received_by</B></TD><TD BGCOLOR="#fce7f3">INT</TD><TD BGCOLOR="#fce7f3"><FONT COLOR="#ea580c"><B>FK → users(id)</B></FONT></TD><TD BGCOLOR="#fce7f3"><FONT COLOR="#ea580c"><B>Rule 3 — 1:N "Receives"</B></FONT></TD></TR>
+    </TABLE>>];
+
+    PURCHASE_ITEMS_TABLE [label=<
+    <TABLE BORDER="2" CELLBORDER="1" CELLSPACING="0" CELLPADDING="5" COLOR="#e11d48" BGCOLOR="#ffffff">
+        <TR><TD COLSPAN="4" BGCOLOR="#e11d48"><FONT COLOR="white"><B>purchase_items</B></FONT></TD></TR>
+        <TR><TD BGCOLOR="#fff1f2"><B>Column</B></TD><TD BGCOLOR="#fff1f2"><B>Type</B></TD><TD BGCOLOR="#fff1f2"><B>Key</B></TD><TD BGCOLOR="#fff1f2"><B>Mapping</B></TD></TR>
+        <TR><TD ALIGN="LEFT">id</TD><TD>INT AUTO_INC</TD><TD><FONT COLOR="#dc2626"><B>PK</B></FONT></TD><TD><FONT COLOR="#64748b">Rule 8</FONT></TD></TR>
+        <TR><TD ALIGN="LEFT" BGCOLOR="#fff1f2"><B>purchase_id</B></TD><TD BGCOLOR="#fff1f2">INT NOT NULL</TD><TD BGCOLOR="#fff1f2"><FONT COLOR="#ea580c"><B>FK → purchases(id)</B></FONT></TD><TD BGCOLOR="#fff1f2"><FONT COLOR="#ea580c"><B>Rule 8 — Aggregation</B></FONT></TD></TR>
+        <TR><TD ALIGN="LEFT" BGCOLOR="#fef3c7"><B>product_id</B></TD><TD BGCOLOR="#fef3c7">INT NOT NULL</TD><TD BGCOLOR="#fef3c7"><FONT COLOR="#ea580c"><B>FK → products(id)</B></FONT></TD><TD BGCOLOR="#fef3c7"><FONT COLOR="#ea580c"><B>Rule 3 — 1:N "Included In"</B></FONT></TD></TR>
+        <TR><TD ALIGN="LEFT">quantity</TD><TD>INT</TD><TD></TD><TD><FONT COLOR="#64748b">From TRANSACTION_ITEM (Rule 9)</FONT></TD></TR>
+        <TR><TD ALIGN="LEFT">purchase_price</TD><TD>DECIMAL(10,2)</TD><TD></TD><TD><FONT COLOR="#64748b">From TRANSACTION_ITEM (Rule 9)</FONT></TD></TR>
+        <TR><TD ALIGN="LEFT">total</TD><TD>DECIMAL(12,2)</TD><TD></TD><TD><FONT COLOR="#64748b">From TRANSACTION_ITEM (Rule 9)</FONT></TD></TR>
+    </TABLE>>];
+
+
+    // =====================================================================
+    //  SECTION 5: INVOICE AGGREGATION MAPPING
+    // =====================================================================
+    SEC5_TITLE [label=<
+    <TABLE BORDER="0" CELLBORDER="0"><TR><TD BGCOLOR="#7c3aed" STYLE="rounded"><FONT COLOR="white" POINT-SIZE="13"><B>  5. Invoice Aggregation  </B></FONT></TD></TR>
+    <TR><TD><FONT POINT-SIZE="10" COLOR="#7c3aed"><B>Rule 1 + Rule 3 + Rule 8:</B> Aggregation → invoices &amp; invoice_items as separate relations. FKs link them.</FONT></TD></TR></TABLE>>];
+
+    INVOICES_TABLE [label=<
+    <TABLE BORDER="2" CELLBORDER="1" CELLSPACING="0" CELLPADDING="5" COLOR="#7c3aed" BGCOLOR="#ffffff">
+        <TR><TD COLSPAN="4" BGCOLOR="#7c3aed"><FONT COLOR="white"><B>invoices</B></FONT></TD></TR>
+        <TR><TD BGCOLOR="#ede9fe"><B>Column</B></TD><TD BGCOLOR="#ede9fe"><B>Type</B></TD><TD BGCOLOR="#ede9fe"><B>Key</B></TD><TD BGCOLOR="#ede9fe"><B>Mapping</B></TD></TR>
+        <TR><TD ALIGN="LEFT">id</TD><TD>INT AUTO_INC</TD><TD><FONT COLOR="#dc2626"><B>PK</B></FONT></TD><TD><FONT COLOR="#64748b">Rule 1</FONT></TD></TR>
+        <TR><TD ALIGN="LEFT">invoice_number</TD><TD>VARCHAR(50)</TD><TD><FONT COLOR="#2563eb">UK</FONT></TD><TD><FONT COLOR="#64748b">Rule 1</FONT></TD></TR>
+        <TR><TD ALIGN="LEFT" BGCOLOR="#ede9fe"><B>customer_id</B></TD><TD BGCOLOR="#ede9fe">INT</TD><TD BGCOLOR="#ede9fe"><FONT COLOR="#ea580c"><B>FK → customers(id)</B></FONT></TD><TD BGCOLOR="#ede9fe"><FONT COLOR="#ea580c"><B>Rule 3 — 1:N "Buys From"</B></FONT></TD></TR>
+        <TR><TD ALIGN="LEFT">invoice_date, due_date</TD><TD>DATE</TD><TD></TD><TD><FONT COLOR="#64748b">Rule 1</FONT></TD></TR>
+        <TR><TD ALIGN="LEFT">subtotal, tax, discount, shipping</TD><TD>DECIMAL</TD><TD></TD><TD><FONT COLOR="#64748b">Rule 1</FONT></TD></TR>
+        <TR><TD ALIGN="LEFT">total_amount, amount_paid</TD><TD>DECIMAL(12,2)</TD><TD></TD><TD><FONT COLOR="#64748b">Rule 1</FONT></TD></TR>
+        <TR><TD ALIGN="LEFT">payment_mode</TD><TD>ENUM</TD><TD></TD><TD><FONT COLOR="#64748b">Rule 1</FONT></TD></TR>
+        <TR><TD ALIGN="LEFT">payment_status</TD><TD>ENUM</TD><TD></TD><TD><FONT COLOR="#64748b">Rule 1</FONT></TD></TR>
+        <TR><TD ALIGN="LEFT" BGCOLOR="#ede9fe"><B>created_by</B></TD><TD BGCOLOR="#ede9fe">INT</TD><TD BGCOLOR="#ede9fe"><FONT COLOR="#ea580c"><B>FK → users(id)</B></FONT></TD><TD BGCOLOR="#ede9fe"><FONT COLOR="#ea580c"><B>Rule 3 — 1:N "Creates"</B></FONT></TD></TR>
+    </TABLE>>];
+
+    INVOICE_ITEMS_TABLE [label=<
+    <TABLE BORDER="2" CELLBORDER="1" CELLSPACING="0" CELLPADDING="5" COLOR="#9333ea" BGCOLOR="#ffffff">
+        <TR><TD COLSPAN="4" BGCOLOR="#9333ea"><FONT COLOR="white"><B>invoice_items</B></FONT></TD></TR>
+        <TR><TD BGCOLOR="#f3e8ff"><B>Column</B></TD><TD BGCOLOR="#f3e8ff"><B>Type</B></TD><TD BGCOLOR="#f3e8ff"><B>Key</B></TD><TD BGCOLOR="#f3e8ff"><B>Mapping</B></TD></TR>
+        <TR><TD ALIGN="LEFT">id</TD><TD>INT AUTO_INC</TD><TD><FONT COLOR="#dc2626"><B>PK</B></FONT></TD><TD><FONT COLOR="#64748b">Rule 8</FONT></TD></TR>
+        <TR><TD ALIGN="LEFT" BGCOLOR="#f3e8ff"><B>invoice_id</B></TD><TD BGCOLOR="#f3e8ff">INT NOT NULL</TD><TD BGCOLOR="#f3e8ff"><FONT COLOR="#ea580c"><B>FK → invoices(id)</B></FONT></TD><TD BGCOLOR="#f3e8ff"><FONT COLOR="#ea580c"><B>Rule 8 — Aggregation</B></FONT></TD></TR>
+        <TR><TD ALIGN="LEFT" BGCOLOR="#fef3c7"><B>product_id</B></TD><TD BGCOLOR="#fef3c7">INT NOT NULL</TD><TD BGCOLOR="#fef3c7"><FONT COLOR="#ea580c"><B>FK → products(id)</B></FONT></TD><TD BGCOLOR="#fef3c7"><FONT COLOR="#ea580c"><B>Rule 3 — 1:N "Included In"</B></FONT></TD></TR>
+        <TR><TD ALIGN="LEFT">quantity</TD><TD>INT</TD><TD></TD><TD><FONT COLOR="#64748b">From TRANSACTION_ITEM (Rule 9)</FONT></TD></TR>
+        <TR><TD ALIGN="LEFT">unit_price</TD><TD>DECIMAL(10,2)</TD><TD></TD><TD><FONT COLOR="#64748b">From TRANSACTION_ITEM (Rule 9)</FONT></TD></TR>
+        <TR><TD ALIGN="LEFT">discount</TD><TD>DECIMAL(10,2)</TD><TD></TD><TD><FONT COLOR="#64748b">Invoice_Item-specific</FONT></TD></TR>
+        <TR><TD ALIGN="LEFT">total</TD><TD>DECIMAL(12,2)</TD><TD></TD><TD><FONT COLOR="#64748b">From TRANSACTION_ITEM (Rule 9)</FONT></TD></TR>
+    </TABLE>>];
+
+
+    // =====================================================================
+    //  SECTION 6: PAYMENT GENERALIZATION MAPPING
+    // =====================================================================
+    SEC6_TITLE [label=<
+    <TABLE BORDER="0" CELLBORDER="0"><TR><TD BGCOLOR="#ca8a04" STYLE="rounded"><FONT COLOR="white" POINT-SIZE="13"><B>  6. Payment Generalization  </B></FONT></TD></TR>
+    <TR><TD><FONT POINT-SIZE="10" COLOR="#ca8a04"><B>Rule 9 (Option B):</B> Total, disjoint → Separate table per subclass. Superclass PAYMENT attrs replicated in each.</FONT></TD></TR></TABLE>>];
+
+    PURCHASE_PAYMENTS_TABLE [label=<
+    <TABLE BORDER="2" CELLBORDER="1" CELLSPACING="0" CELLPADDING="5" COLOR="#ca8a04" BGCOLOR="#ffffff">
+        <TR><TD COLSPAN="4" BGCOLOR="#ca8a04"><FONT COLOR="white"><B>purchase_payments</B></FONT></TD></TR>
+        <TR><TD BGCOLOR="#fef9c3"><B>Column</B></TD><TD BGCOLOR="#fef9c3"><B>Type</B></TD><TD BGCOLOR="#fef9c3"><B>Key</B></TD><TD BGCOLOR="#fef9c3"><B>Mapping</B></TD></TR>
+        <TR><TD ALIGN="LEFT">id</TD><TD>INT AUTO_INC</TD><TD><FONT COLOR="#dc2626"><B>PK</B></FONT></TD><TD><FONT COLOR="#64748b">Rule 1</FONT></TD></TR>
+        <TR><TD ALIGN="LEFT" BGCOLOR="#fef9c3"><B>purchase_id</B></TD><TD BGCOLOR="#fef9c3">INT NOT NULL</TD><TD BGCOLOR="#fef9c3"><FONT COLOR="#ea580c"><B>FK → purchases(id)</B></FONT></TD><TD BGCOLOR="#fef9c3"><FONT COLOR="#ea580c"><B>Rule 3 — 1:N "Paid Via"</B></FONT></TD></TR>
+        <TR><TD ALIGN="LEFT" BGCOLOR="#fffbeb">payment_date</TD><TD BGCOLOR="#fffbeb">DATE</TD><TD BGCOLOR="#fffbeb"></TD><TD BGCOLOR="#fffbeb"><FONT COLOR="#ca8a04"><B>From PAYMENT superclass</B></FONT></TD></TR>
+        <TR><TD ALIGN="LEFT" BGCOLOR="#fffbeb">amount</TD><TD BGCOLOR="#fffbeb">DECIMAL(12,2)</TD><TD BGCOLOR="#fffbeb"></TD><TD BGCOLOR="#fffbeb"><FONT COLOR="#ca8a04"><B>From PAYMENT</B></FONT></TD></TR>
+        <TR><TD ALIGN="LEFT" BGCOLOR="#fffbeb">payment_mode</TD><TD BGCOLOR="#fffbeb">ENUM</TD><TD BGCOLOR="#fffbeb"></TD><TD BGCOLOR="#fffbeb"><FONT COLOR="#ca8a04"><B>From PAYMENT</B></FONT></TD></TR>
+        <TR><TD ALIGN="LEFT" BGCOLOR="#fffbeb">reference_no</TD><TD BGCOLOR="#fffbeb">VARCHAR(100)</TD><TD BGCOLOR="#fffbeb"></TD><TD BGCOLOR="#fffbeb"><FONT COLOR="#ca8a04"><B>From PAYMENT</B></FONT></TD></TR>
+        <TR><TD ALIGN="LEFT" BGCOLOR="#fffbeb">notes</TD><TD BGCOLOR="#fffbeb">TEXT</TD><TD BGCOLOR="#fffbeb"></TD><TD BGCOLOR="#fffbeb"><FONT COLOR="#ca8a04"><B>From PAYMENT</B></FONT></TD></TR>
+        <TR><TD ALIGN="LEFT" BGCOLOR="#fef9c3"><B>created_by</B></TD><TD BGCOLOR="#fef9c3">INT</TD><TD BGCOLOR="#fef9c3"><FONT COLOR="#ea580c"><B>FK → users(id)</B></FONT></TD><TD BGCOLOR="#fef9c3"><FONT COLOR="#ea580c"><B>Rule 3</B></FONT></TD></TR>
+    </TABLE>>];
+
+    INVOICE_PAYMENTS_TABLE [label=<
+    <TABLE BORDER="2" CELLBORDER="1" CELLSPACING="0" CELLPADDING="5" COLOR="#ca8a04" BGCOLOR="#ffffff">
+        <TR><TD COLSPAN="4" BGCOLOR="#ca8a04"><FONT COLOR="white"><B>invoice_payments</B></FONT></TD></TR>
+        <TR><TD BGCOLOR="#fef9c3"><B>Column</B></TD><TD BGCOLOR="#fef9c3"><B>Type</B></TD><TD BGCOLOR="#fef9c3"><B>Key</B></TD><TD BGCOLOR="#fef9c3"><B>Mapping</B></TD></TR>
+        <TR><TD ALIGN="LEFT">id</TD><TD>INT AUTO_INC</TD><TD><FONT COLOR="#dc2626"><B>PK</B></FONT></TD><TD><FONT COLOR="#64748b">Rule 1</FONT></TD></TR>
+        <TR><TD ALIGN="LEFT" BGCOLOR="#fef9c3"><B>invoice_id</B></TD><TD BGCOLOR="#fef9c3">INT NOT NULL</TD><TD BGCOLOR="#fef9c3"><FONT COLOR="#ea580c"><B>FK → invoices(id)</B></FONT></TD><TD BGCOLOR="#fef9c3"><FONT COLOR="#ea580c"><B>Rule 3 — 1:N "Paid Via"</B></FONT></TD></TR>
+        <TR><TD ALIGN="LEFT" BGCOLOR="#fffbeb">payment_date</TD><TD BGCOLOR="#fffbeb">DATE</TD><TD BGCOLOR="#fffbeb"></TD><TD BGCOLOR="#fffbeb"><FONT COLOR="#ca8a04"><B>From PAYMENT superclass</B></FONT></TD></TR>
+        <TR><TD ALIGN="LEFT" BGCOLOR="#fffbeb">amount</TD><TD BGCOLOR="#fffbeb">DECIMAL(12,2)</TD><TD BGCOLOR="#fffbeb"></TD><TD BGCOLOR="#fffbeb"><FONT COLOR="#ca8a04"><B>From PAYMENT</B></FONT></TD></TR>
+        <TR><TD ALIGN="LEFT" BGCOLOR="#fffbeb">payment_mode</TD><TD BGCOLOR="#fffbeb">ENUM</TD><TD BGCOLOR="#fffbeb"></TD><TD BGCOLOR="#fffbeb"><FONT COLOR="#ca8a04"><B>From PAYMENT</B></FONT></TD></TR>
+        <TR><TD ALIGN="LEFT" BGCOLOR="#fffbeb">reference_no</TD><TD BGCOLOR="#fffbeb">VARCHAR(100)</TD><TD BGCOLOR="#fffbeb"></TD><TD BGCOLOR="#fffbeb"><FONT COLOR="#ca8a04"><B>From PAYMENT</B></FONT></TD></TR>
+        <TR><TD ALIGN="LEFT" BGCOLOR="#fffbeb">notes</TD><TD BGCOLOR="#fffbeb">TEXT</TD><TD BGCOLOR="#fffbeb"></TD><TD BGCOLOR="#fffbeb"><FONT COLOR="#ca8a04"><B>From PAYMENT</B></FONT></TD></TR>
+        <TR><TD ALIGN="LEFT" BGCOLOR="#fef9c3"><B>created_by</B></TD><TD BGCOLOR="#fef9c3">INT</TD><TD BGCOLOR="#fef9c3"><FONT COLOR="#ea580c"><B>FK → users(id)</B></FONT></TD><TD BGCOLOR="#fef9c3"><FONT COLOR="#ea580c"><B>Rule 3</B></FONT></TD></TR>
+    </TABLE>>];
+
+
+    // =====================================================================
+    //  SECTION 7: INVENTORY MOVEMENTS & AUDIT (Strong Entities)
+    // =====================================================================
+    SEC7_TITLE [label=<
+    <TABLE BORDER="0" CELLBORDER="0"><TR><TD BGCOLOR="#0284c7" STYLE="rounded"><FONT COLOR="white" POINT-SIZE="13"><B>  7. Tracking &amp; Audit (Strong Entities)  </B></FONT></TD></TR>
+    <TR><TD><FONT POINT-SIZE="10" COLOR="#0284c7"><B>Rule 1 + Rule 3:</B> Strong entities with FKs for 1:N relationships to users and products.</FONT></TD></TR></TABLE>>];
+
+    INVENTORY_TABLE [label=<
+    <TABLE BORDER="2" CELLBORDER="1" CELLSPACING="0" CELLPADDING="5" COLOR="#0284c7" BGCOLOR="#ffffff">
+        <TR><TD COLSPAN="4" BGCOLOR="#0284c7"><FONT COLOR="white"><B>inventory_movements</B></FONT></TD></TR>
+        <TR><TD BGCOLOR="#e0f2fe"><B>Column</B></TD><TD BGCOLOR="#e0f2fe"><B>Type</B></TD><TD BGCOLOR="#e0f2fe"><B>Key</B></TD><TD BGCOLOR="#e0f2fe"><B>Mapping</B></TD></TR>
+        <TR><TD ALIGN="LEFT">id</TD><TD>INT AUTO_INC</TD><TD><FONT COLOR="#dc2626"><B>PK</B></FONT></TD><TD><FONT COLOR="#64748b">Rule 1</FONT></TD></TR>
+        <TR><TD ALIGN="LEFT" BGCOLOR="#e0f2fe"><B>product_id</B></TD><TD BGCOLOR="#e0f2fe">INT NOT NULL</TD><TD BGCOLOR="#e0f2fe"><FONT COLOR="#ea580c"><B>FK → products(id)</B></FONT></TD><TD BGCOLOR="#e0f2fe"><FONT COLOR="#ea580c"><B>Rule 3 — 1:N "Tracked By"</B></FONT></TD></TR>
+        <TR><TD ALIGN="LEFT">movement_type</TD><TD>ENUM</TD><TD></TD><TD><FONT COLOR="#64748b">Rule 1</FONT></TD></TR>
+        <TR><TD ALIGN="LEFT">quantity</TD><TD>INT</TD><TD></TD><TD><FONT COLOR="#64748b">Rule 1</FONT></TD></TR>
+        <TR><TD ALIGN="LEFT">reference_type</TD><TD>ENUM</TD><TD></TD><TD><FONT COLOR="#64748b">Rule 1 (polymorphic ref)</FONT></TD></TR>
+        <TR><TD ALIGN="LEFT">reference_id</TD><TD>INT</TD><TD></TD><TD><FONT COLOR="#64748b">Rule 1 (polymorphic ref)</FONT></TD></TR>
+        <TR><TD ALIGN="LEFT">previous_quantity, new_quantity</TD><TD>INT</TD><TD></TD><TD><FONT COLOR="#64748b">Rule 1</FONT></TD></TR>
+        <TR><TD ALIGN="LEFT" BGCOLOR="#e0f2fe"><B>created_by</B></TD><TD BGCOLOR="#e0f2fe">INT</TD><TD BGCOLOR="#e0f2fe"><FONT COLOR="#ea580c"><B>FK → users(id)</B></FONT></TD><TD BGCOLOR="#e0f2fe"><FONT COLOR="#ea580c"><B>Rule 3 — 1:N "Performs"</B></FONT></TD></TR>
+    </TABLE>>];
+
+    AUDIT_TABLE [label=<
+    <TABLE BORDER="2" CELLBORDER="1" CELLSPACING="0" CELLPADDING="5" COLOR="#475569" BGCOLOR="#ffffff">
+        <TR><TD COLSPAN="4" BGCOLOR="#475569"><FONT COLOR="white"><B>audit_logs</B></FONT></TD></TR>
+        <TR><TD BGCOLOR="#f1f5f9"><B>Column</B></TD><TD BGCOLOR="#f1f5f9"><B>Type</B></TD><TD BGCOLOR="#f1f5f9"><B>Key</B></TD><TD BGCOLOR="#f1f5f9"><B>Mapping</B></TD></TR>
+        <TR><TD ALIGN="LEFT">id</TD><TD>INT AUTO_INC</TD><TD><FONT COLOR="#dc2626"><B>PK</B></FONT></TD><TD><FONT COLOR="#64748b">Rule 1</FONT></TD></TR>
+        <TR><TD ALIGN="LEFT" BGCOLOR="#f1f5f9"><B>user_id</B></TD><TD BGCOLOR="#f1f5f9">INT</TD><TD BGCOLOR="#f1f5f9"><FONT COLOR="#ea580c"><B>FK → users(id)</B></FONT></TD><TD BGCOLOR="#f1f5f9"><FONT COLOR="#ea580c"><B>Rule 3 — 1:N "Generates"</B></FONT></TD></TR>
+        <TR><TD ALIGN="LEFT">action</TD><TD>VARCHAR(50)</TD><TD></TD><TD><FONT COLOR="#64748b">Rule 1</FONT></TD></TR>
+        <TR><TD ALIGN="LEFT">entity_type, entity_id</TD><TD>VARCHAR/INT</TD><TD></TD><TD><FONT COLOR="#64748b">Rule 1 (polymorphic ref)</FONT></TD></TR>
+        <TR><TD ALIGN="LEFT">old_values, new_values</TD><TD>JSON</TD><TD></TD><TD><FONT COLOR="#64748b">Rule 1</FONT></TD></TR>
+        <TR><TD ALIGN="LEFT">ip_address</TD><TD>VARCHAR(45)</TD><TD></TD><TD><FONT COLOR="#64748b">Rule 1</FONT></TD></TR>
+    </TABLE>>];
+
+    SYSCONFIG_TABLE [label=<
+    <TABLE BORDER="2" CELLBORDER="1" CELLSPACING="0" CELLPADDING="5" COLOR="#475569" BGCOLOR="#ffffff">
+        <TR><TD COLSPAN="4" BGCOLOR="#475569"><FONT COLOR="white"><B>system_config</B></FONT></TD></TR>
+        <TR><TD BGCOLOR="#f1f5f9"><B>Column</B></TD><TD BGCOLOR="#f1f5f9"><B>Type</B></TD><TD BGCOLOR="#f1f5f9"><B>Key</B></TD><TD BGCOLOR="#f1f5f9"><B>Mapping</B></TD></TR>
+        <TR><TD ALIGN="LEFT">id</TD><TD>INT AUTO_INC</TD><TD><FONT COLOR="#dc2626"><B>PK</B></FONT></TD><TD><FONT COLOR="#64748b">Rule 1</FONT></TD></TR>
+        <TR><TD ALIGN="LEFT">config_key</TD><TD>VARCHAR(50)</TD><TD><FONT COLOR="#2563eb">UK</FONT></TD><TD><FONT COLOR="#64748b">Rule 1</FONT></TD></TR>
+        <TR><TD ALIGN="LEFT">config_value</TD><TD>TEXT</TD><TD></TD><TD><FONT COLOR="#64748b">Rule 1</FONT></TD></TR>
+        <TR><TD ALIGN="LEFT">description</TD><TD>VARCHAR(255)</TD><TD></TD><TD><FONT COLOR="#64748b">Rule 1</FONT></TD></TR>
+    </TABLE>>];
+
+
+    // =====================================================================
+    //  FK RELATIONSHIP EDGES
+    // =====================================================================
+
+    // Products -> Vendors
+    PRODUCTS_TABLE -> VENDORS_TABLE [label="vendor_id FK", color="#059669", penwidth=2, style=dashed];
+
+    // Purchases -> Vendors
+    PURCHASES_TABLE -> VENDORS_TABLE [label="vendor_id FK", color="#059669", penwidth=2, style=dashed];
+
+    // Purchases -> Users
+    PURCHASES_TABLE -> USERS_TABLE [label="received_by FK", color="#2563eb", penwidth=2, style=dashed];
+
+    // Purchase_Items -> Purchases
+    PURCHASE_ITEMS_TABLE -> PURCHASES_TABLE [label="purchase_id FK", color="#db2777", penwidth=2, style=dashed];
+
+    // Purchase_Items -> Products
+    PURCHASE_ITEMS_TABLE -> PRODUCTS_TABLE [label="product_id FK", color="#d97706", penwidth=2, style=dashed];
+
+    // Invoices -> Customers
+    INVOICES_TABLE -> CUSTOMERS_TABLE [label="customer_id FK", color="#16a34a", penwidth=2, style=dashed];
+
+    // Invoices -> Users
+    INVOICES_TABLE -> USERS_TABLE [label="created_by FK", color="#2563eb", penwidth=2, style=dashed];
+
+    // Invoice_Items -> Invoices
+    INVOICE_ITEMS_TABLE -> INVOICES_TABLE [label="invoice_id FK", color="#7c3aed", penwidth=2, style=dashed];
+
+    // Invoice_Items -> Products
+    INVOICE_ITEMS_TABLE -> PRODUCTS_TABLE [label="product_id FK", color="#d97706", penwidth=2, style=dashed];
+
+    // Purchase_Payments -> Purchases
+    PURCHASE_PAYMENTS_TABLE -> PURCHASES_TABLE [label="purchase_id FK", color="#ca8a04", penwidth=2, style=dashed];
+
+    // Purchase_Payments -> Users
+    PURCHASE_PAYMENTS_TABLE -> USERS_TABLE [label="created_by FK", color="#2563eb", penwidth=1.5, style=dashed];
+
+    // Invoice_Payments -> Invoices
+    INVOICE_PAYMENTS_TABLE -> INVOICES_TABLE [label="invoice_id FK", color="#ca8a04", penwidth=2, style=dashed];
+
+    // Invoice_Payments -> Users
+    INVOICE_PAYMENTS_TABLE -> USERS_TABLE [label="created_by FK", color="#2563eb", penwidth=1.5, style=dashed];
+
+    // Inventory_Movements -> Products
+    INVENTORY_TABLE -> PRODUCTS_TABLE [label="product_id FK", color="#0284c7", penwidth=2, style=dashed];
+
+    // Inventory_Movements -> Users
+    INVENTORY_TABLE -> USERS_TABLE [label="created_by FK", color="#2563eb", penwidth=1.5, style=dashed];
+
+    // Audit_Logs -> Users
+    AUDIT_TABLE -> USERS_TABLE [label="user_id FK", color="#475569", penwidth=1.5, style=dashed];
+
+
+    // =====================================================================
+    //  LAYOUT HINTS (invisible edges for ordering)
+    // =====================================================================
+    edge [style=invis];
+    RULES -> SEC1_TITLE;
+    SEC1_TITLE -> USERS_TABLE;
+    SEC2_TITLE -> VENDORS_TABLE;
+    SEC2_TITLE -> CUSTOMERS_TABLE;
+    SEC3_TITLE -> PRODUCTS_TABLE;
+    SEC4_TITLE -> PURCHASES_TABLE;
+    PURCHASES_TABLE -> PURCHASE_ITEMS_TABLE;
+    SEC5_TITLE -> INVOICES_TABLE;
+    INVOICES_TABLE -> INVOICE_ITEMS_TABLE;
+    SEC6_TITLE -> PURCHASE_PAYMENTS_TABLE;
+    SEC6_TITLE -> INVOICE_PAYMENTS_TABLE;
+    SEC7_TITLE -> INVENTORY_TABLE;
+    SEC7_TITLE -> AUDIT_TABLE;
+    AUDIT_TABLE -> SYSCONFIG_TABLE;
+}

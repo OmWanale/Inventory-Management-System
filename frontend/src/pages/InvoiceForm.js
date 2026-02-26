@@ -27,7 +27,7 @@ const InvoiceForm = () => {
     invoice_date: new Date().toISOString().split('T')[0],
     due_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
     status: 'draft',
-    payment_status: 'unpaid',
+    payment_status: 'pending',
     payment_method: '',
     discount_type: 'fixed',
     discount_value: 0,
@@ -46,7 +46,7 @@ const InvoiceForm = () => {
         (p) =>
           (p.name.toLowerCase().includes(productSearch.toLowerCase()) ||
             p.sku.toLowerCase().includes(productSearch.toLowerCase())) &&
-          p.stock_quantity > 0
+          (p.quantity || p.stock_quantity) > 0
       );
       setFilteredProducts(filtered.slice(0, 10));
     } else {
@@ -61,7 +61,8 @@ const InvoiceForm = () => {
         productAPI.getAll({ limit: 1000 }),
       ]);
       setCustomers(customersRes.data.data);
-      setProducts(productsRes.data.data);
+      const productsList = productsRes.data.data;
+      setProducts(productsList);
 
       if (isEdit) {
         const invoiceRes = await invoiceAPI.getById(id);
@@ -79,11 +80,11 @@ const InvoiceForm = () => {
           notes: invoice.notes || '',
           items: invoice.items.map((item) => ({
             product_id: item.product_id,
-            product_name: item.product_name,
+            product_name: item.product_name || item.name,
             sku: item.sku,
             quantity: item.quantity,
             unit_price: item.unit_price,
-            max_quantity: item.quantity + (products.find(p => p.id === item.product_id)?.stock_quantity || 0),
+            max_quantity: item.quantity + (productsList.find(p => p.id === item.product_id)?.quantity || 0),
           })),
         });
       }
@@ -113,7 +114,7 @@ const InvoiceForm = () => {
       sku: product.sku,
       quantity: 1,
       unit_price: product.selling_price || 0,
-      max_quantity: product.stock_quantity,
+      max_quantity: product.quantity || product.stock_quantity,
     };
 
     setFormData((prev) => ({
@@ -189,11 +190,20 @@ const InvoiceForm = () => {
     try {
       setSaving(true);
       const data = {
-        ...formData,
+        customerId: formData.customer_id,
+        invoiceDate: formData.invoice_date,
+        dueDate: formData.due_date,
+        taxRate: parseFloat(formData.tax_rate) || 0,
+        discountAmount: calculateDiscount(),
+        notes: formData.notes,
         subtotal: calculateSubtotal(),
-        discount_amount: calculateDiscount(),
-        tax_amount: calculateTax(),
-        total_amount: calculateTotal(),
+        totalAmount: calculateTotal(),
+        items: formData.items.map(item => ({
+          productId: item.product_id,
+          quantity: item.quantity,
+          unitPrice: item.unit_price,
+          discount: 0,
+        })),
       };
 
       if (isEdit) {
@@ -279,58 +289,21 @@ const InvoiceForm = () => {
               />
             </div>
             {isEdit && (
-              <>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Status
-                  </label>
-                  <select
-                    name="status"
-                    value={formData.status}
-                    onChange={handleChange}
-                    className="input"
-                  >
-                    <option value="draft">Draft</option>
-                    <option value="sent">Sent</option>
-                    <option value="paid">Paid</option>
-                    <option value="overdue">Overdue</option>
-                    <option value="cancelled">Cancelled</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Payment Status
-                  </label>
-                  <select
-                    name="payment_status"
-                    value={formData.payment_status}
-                    onChange={handleChange}
-                    className="input"
-                  >
-                    <option value="unpaid">Unpaid</option>
-                    <option value="partial">Partial</option>
-                    <option value="paid">Paid</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Payment Method
-                  </label>
-                  <select
-                    name="payment_method"
-                    value={formData.payment_method}
-                    onChange={handleChange}
-                    className="input"
-                  >
-                    <option value="">Select Method</option>
-                    <option value="cash">Cash</option>
-                    <option value="card">Card</option>
-                    <option value="upi">UPI</option>
-                    <option value="bank_transfer">Bank Transfer</option>
-                    <option value="cheque">Cheque</option>
-                  </select>
-                </div>
-              </>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Status
+                </label>
+                <select
+                  name="status"
+                  value={formData.status}
+                  onChange={handleChange}
+                  className="input"
+                >
+                  <option value="draft">Draft</option>
+                  <option value="sent">Sent</option>
+                  <option value="cancelled">Cancelled</option>
+                </select>
+              </div>
             )}
           </div>
         </div>
@@ -377,7 +350,7 @@ const InvoiceForm = () => {
                       <div>
                         <p className="font-medium">{product.name}</p>
                         <p className="text-sm text-gray-500">
-                          SKU: {product.sku} | Stock: {product.stock_quantity}
+                          SKU: {product.sku} | Stock: {product.quantity || product.stock_quantity}
                         </p>
                       </div>
                       <span className="text-gray-600">

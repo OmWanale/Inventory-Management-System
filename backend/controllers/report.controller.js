@@ -46,8 +46,8 @@ exports.getSalesReport = async (req, res) => {
         COALESCE(SUM(i.tax_amount), 0) as tax,
         COALESCE(SUM(i.discount_amount), 0) as discount,
         COALESCE(SUM(i.total_amount), 0) as totalSales,
-        COALESCE(SUM(i.amount_paid), 0) as collected,
-        COALESCE(SUM(i.total_amount - i.amount_paid), 0) as outstanding
+        COALESCE(SUM(i.amount_paid), 0) as paidAmount,
+        COALESCE(SUM(i.total_amount - i.amount_paid), 0) as pendingAmount
        FROM invoices i WHERE ${whereClause}`,
       params
     );
@@ -98,13 +98,26 @@ exports.getSalesReport = async (req, res) => {
       params
     );
 
+    // Invoice list for table
+    const [invoices] = await pool.query(
+      `SELECT i.id, i.invoice_number, i.invoice_date, c.name as customer_name,
+        i.total_amount, i.payment_status,
+        (SELECT COUNT(*) FROM invoice_items ii WHERE ii.invoice_id = i.id) as item_count
+       FROM invoices i
+       LEFT JOIN customers c ON i.customer_id = c.id
+       WHERE ${whereClause}
+       ORDER BY i.invoice_date DESC`,
+      params
+    );
+
     res.json({
       success: true,
       data: {
         summary,
         timeSeries,
         customerBreakdown,
-        productBreakdown
+        productBreakdown,
+        invoices
       }
     });
   } catch (error) {
@@ -151,12 +164,12 @@ exports.getPurchaseReport = async (req, res) => {
     // Summary
     const [[summary]] = await pool.query(
       `SELECT 
-        COUNT(DISTINCT p.id) as totalPurchases,
+        COUNT(DISTINCT p.id) as totalOrders,
         COALESCE(SUM(p.subtotal), 0) as subtotal,
         COALESCE(SUM(p.tax_amount), 0) as tax,
         COALESCE(SUM(p.total_amount), 0) as totalPurchases,
-        SUM(CASE WHEN p.payment_status = 'paid' THEN p.total_amount ELSE 0 END) as paid,
-        SUM(CASE WHEN p.payment_status != 'paid' THEN p.total_amount ELSE 0 END) as pending
+        COALESCE(SUM(p.amount_paid), 0) as paidAmount,
+        COALESCE(SUM(p.total_amount - p.amount_paid), 0) as pendingAmount
        FROM purchases p WHERE ${whereClause}`,
       params
     );
@@ -189,12 +202,26 @@ exports.getPurchaseReport = async (req, res) => {
       params
     );
 
+    // Purchase list for table
+    const [purchaseList] = await pool.query(
+      `SELECT p.id, p.purchase_number as po_number, p.purchase_date, v.name as vendor_name,
+        p.total_amount, p.amount_paid, p.payment_status as status, p.order_status,
+        p.payment_due_date,
+        (SELECT COUNT(*) FROM purchase_items pi WHERE pi.purchase_id = p.id) as item_count
+       FROM purchases p
+       JOIN vendors v ON p.vendor_id = v.id
+       WHERE ${whereClause}
+       ORDER BY p.purchase_date DESC`,
+      params
+    );
+
     res.json({
       success: true,
       data: {
         summary,
         timeSeries,
-        vendorBreakdown
+        vendorBreakdown,
+        purchases: purchaseList
       }
     });
   } catch (error) {
@@ -248,6 +275,26 @@ exports.getProfitLossReport = async (req, res) => {
     const grossProfit = sales.total - cogs.total;
     const netProfit = sales.total - purchases.total;
 
+    // Invoice breakdown
+    const [[invoiceBreakdown]] = await pool.query(
+      `SELECT 
+        COUNT(*) as totalInvoices,
+        COALESCE(SUM(CASE WHEN payment_status = 'paid' THEN total_amount ELSE 0 END), 0) as paidSales,
+        COALESCE(SUM(CASE WHEN payment_status != 'paid' THEN total_amount ELSE 0 END), 0) as pendingSales
+       FROM invoices WHERE ${whereClause.replace(/date/g, 'invoice_date')}`,
+      params
+    );
+
+    // Purchase breakdown
+    const [[purchaseBreakdown]] = await pool.query(
+      `SELECT 
+        COUNT(*) as totalPurchaseOrders,
+        COALESCE(SUM(amount_paid), 0) as paidPurchases,
+        COALESCE(SUM(total_amount - amount_paid), 0) as pendingPurchases
+       FROM purchases WHERE ${whereClause.replace(/date/g, 'purchase_date')}`,
+      params
+    );
+
     // Monthly breakdown
     const [monthlyData] = await pool.query(
       `SELECT 
@@ -272,14 +319,18 @@ exports.getProfitLossReport = async (req, res) => {
     res.json({
       success: true,
       data: {
-        summary: {
-          revenue: sales.total,
-          costOfGoodsSold: cogs.total,
-          grossProfit,
-          totalPurchases: purchases.total,
-          netProfit,
-          grossMargin: sales.total > 0 ? ((grossProfit / sales.total) * 100).toFixed(2) : 0
-        },
+        totalSales: sales.total,
+        totalPurchases: purchases.total,
+        costOfGoodsSold: cogs.total,
+        grossProfit,
+        netProfit,
+        grossMargin: sales.total > 0 ? ((grossProfit / sales.total) * 100).toFixed(2) : 0,
+        totalInvoices: invoiceBreakdown.totalInvoices,
+        paidSales: invoiceBreakdown.paidSales,
+        pendingSales: invoiceBreakdown.pendingSales,
+        totalPurchaseOrders: purchaseBreakdown.totalPurchaseOrders,
+        paidPurchases: purchaseBreakdown.paidPurchases,
+        pendingPurchases: purchaseBreakdown.pendingPurchases,
         monthlySales: monthlyData,
         monthlyPurchases
       }
@@ -315,7 +366,7 @@ exports.getStockReport = async (req, res) => {
     }
 
     const [products] = await pool.query(
-      `SELECT p.id, p.sku, p.name, p.category, p.quantity, p.reorder_level,
+      `SELECT p.id, p.sku, p.name, p.category, p.quantity, p.quantity as stock_quantity, p.reorder_level,
         p.purchase_price, p.selling_price,
         (p.quantity * p.purchase_price) as costValue,
         (p.quantity * p.selling_price) as retailValue,
@@ -331,9 +382,12 @@ exports.getStockReport = async (req, res) => {
     const summary = {
       totalProducts: products.length,
       totalUnits: products.reduce((sum, p) => sum + p.quantity, 0),
+      totalValue: products.reduce((sum, p) => sum + parseFloat(p.costValue || 0), 0),
       totalCostValue: products.reduce((sum, p) => sum + parseFloat(p.costValue || 0), 0),
       totalRetailValue: products.reduce((sum, p) => sum + parseFloat(p.retailValue || 0), 0),
+      lowStock: products.filter(p => p.quantity <= p.reorder_level && p.quantity > 0).length,
       lowStockCount: products.filter(p => p.quantity <= p.reorder_level).length,
+      outOfStock: products.filter(p => p.quantity === 0).length,
       outOfStockCount: products.filter(p => p.quantity === 0).length
     };
 

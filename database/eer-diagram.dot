@@ -1,0 +1,678 @@
+digraph EER {
+    // Global settings
+    graph [
+        rankdir=TB,
+        splines=ortho,
+        nodesep=0.8,
+        ranksep=1.2,
+        bgcolor="white",
+        fontname="Helvetica",
+        label="Enhanced Entity-Relationship (EER) Diagram\nInventory Management System",
+        labelloc=t,
+        fontsize=28,
+        fontcolor="#1a1a2e",
+        pad="0.5"
+    ];
+    node [fontname="Helvetica", fontsize=11];
+    edge [fontname="Helvetica", fontsize=9, color="#555555"];
+
+    // ===================== ENTITY NODES (Rectangles) =====================
+
+    USERS [
+        shape=record,
+        style="filled,bold",
+        fillcolor="#dbeafe",
+        color="#2563eb",
+        label=<
+        <TABLE BORDER="0" CELLBORDER="0" CELLSPACING="2">
+            <TR><TD COLSPAN="2" BGCOLOR="#2563eb"><FONT COLOR="white"><B>USERS</B></FONT></TD></TR>
+            <TR><TD ALIGN="LEFT"><U>id (PK)</U></TD><TD ALIGN="LEFT">INT</TD></TR>
+            <TR><TD ALIGN="LEFT">username (UK)</TD><TD ALIGN="LEFT">VARCHAR</TD></TR>
+            <TR><TD ALIGN="LEFT">email (UK)</TD><TD ALIGN="LEFT">VARCHAR</TD></TR>
+            <TR><TD ALIGN="LEFT">password</TD><TD ALIGN="LEFT">VARCHAR</TD></TR>
+            <TR><TD ALIGN="LEFT">full_name</TD><TD ALIGN="LEFT">VARCHAR</TD></TR>
+            <TR><TD ALIGN="LEFT">phone</TD><TD ALIGN="LEFT">VARCHAR</TD></TR>
+            <TR><TD ALIGN="LEFT">avatar</TD><TD ALIGN="LEFT">VARCHAR</TD></TR>
+            <TR><TD ALIGN="LEFT">is_active</TD><TD ALIGN="LEFT">BOOLEAN</TD></TR>
+            <TR><TD ALIGN="LEFT">last_login</TD><TD ALIGN="LEFT">DATETIME</TD></TR>
+            <TR><TD ALIGN="LEFT">created_at</TD><TD ALIGN="LEFT">TIMESTAMP</TD></TR>
+        </TABLE>>
+    ];
+
+    VENDORS [
+        shape=record,
+        style="filled,bold",
+        fillcolor="#dcfce7",
+        color="#16a34a",
+        label=<
+        <TABLE BORDER="0" CELLBORDER="0" CELLSPACING="2">
+            <TR><TD COLSPAN="2" BGCOLOR="#16a34a"><FONT COLOR="white"><B>VENDORS</B></FONT></TD></TR>
+            <TR><TD ALIGN="LEFT"><U>id (PK)</U></TD><TD ALIGN="LEFT">INT</TD></TR>
+            <TR><TD ALIGN="LEFT">name</TD><TD ALIGN="LEFT">VARCHAR</TD></TR>
+            <TR><TD ALIGN="LEFT">contact_person</TD><TD ALIGN="LEFT">VARCHAR</TD></TR>
+            <TR><TD ALIGN="LEFT">phone</TD><TD ALIGN="LEFT">VARCHAR</TD></TR>
+            <TR><TD ALIGN="LEFT">email</TD><TD ALIGN="LEFT">VARCHAR</TD></TR>
+            <TR><TD ALIGN="LEFT">address</TD><TD ALIGN="LEFT">TEXT</TD></TR>
+            <TR><TD ALIGN="LEFT">city, state, postal</TD><TD ALIGN="LEFT">VARCHAR</TD></TR>
+            <TR><TD ALIGN="LEFT">gst_number</TD><TD ALIGN="LEFT">VARCHAR</TD></TR>
+            <TR><TD ALIGN="LEFT">tax_id</TD><TD ALIGN="LEFT">VARCHAR</TD></TR>
+            <TR><TD ALIGN="LEFT">payment_terms</TD><TD ALIGN="LEFT">VARCHAR</TD></TR>
+            <TR><TD ALIGN="LEFT">status</TD><TD ALIGN="LEFT">ENUM</TD></TR>
+        </TABLE>>
+    ];
+
+    CUSTOMERS [
+        shape=record,
+        style="filled,bold",
+        fillcolor="#dcfce7",
+        color="#16a34a",
+        label=<
+        <TABLE BORDER="0" CELLBORDER="0" CELLSPACING="2">
+            <TR><TD COLSPAN="2" BGCOLOR="#16a34a"><FONT COLOR="white"><B>CUSTOMERS</B></FONT></TD></TR>
+            <TR><TD ALIGN="LEFT"><U>id (PK)</U></TD><TD ALIGN="LEFT">INT</TD></TR>
+            <TR><TD ALIGN="LEFT">name</TD><TD ALIGN="LEFT">VARCHAR</TD></TR>
+            <TR><TD ALIGN="LEFT">phone</TD><TD ALIGN="LEFT">VARCHAR</TD></TR>
+            <TR><TD ALIGN="LEFT">email</TD><TD ALIGN="LEFT">VARCHAR</TD></TR>
+            <TR><TD ALIGN="LEFT">billing_address</TD><TD ALIGN="LEFT">TEXT</TD></TR>
+            <TR><TD ALIGN="LEFT">shipping_address</TD><TD ALIGN="LEFT">TEXT</TD></TR>
+            <TR><TD ALIGN="LEFT">city, state, postal</TD><TD ALIGN="LEFT">VARCHAR</TD></TR>
+            <TR><TD ALIGN="LEFT">gst_number</TD><TD ALIGN="LEFT">VARCHAR</TD></TR>
+            <TR><TD ALIGN="LEFT">credit_limit</TD><TD ALIGN="LEFT">DECIMAL</TD></TR>
+            <TR><TD ALIGN="LEFT">outstanding_balance</TD><TD ALIGN="LEFT">DECIMAL</TD></TR>
+            <TR><TD ALIGN="LEFT">status</TD><TD ALIGN="LEFT">ENUM</TD></TR>
+        </TABLE>>
+    ];
+
+    PRODUCTS [
+        shape=record,
+        style="filled,bold",
+        fillcolor="#fef3c7",
+        color="#d97706",
+        label=<
+        <TABLE BORDER="0" CELLBORDER="0" CELLSPACING="2">
+            <TR><TD COLSPAN="2" BGCOLOR="#d97706"><FONT COLOR="white"><B>PRODUCTS</B></FONT></TD></TR>
+            <TR><TD ALIGN="LEFT"><U>id (PK)</U></TD><TD ALIGN="LEFT">INT</TD></TR>
+            <TR><TD ALIGN="LEFT">sku (UK)</TD><TD ALIGN="LEFT">VARCHAR</TD></TR>
+            <TR><TD ALIGN="LEFT">name</TD><TD ALIGN="LEFT">VARCHAR</TD></TR>
+            <TR><TD ALIGN="LEFT">description</TD><TD ALIGN="LEFT">TEXT</TD></TR>
+            <TR><TD ALIGN="LEFT">category</TD><TD ALIGN="LEFT">VARCHAR</TD></TR>
+            <TR><TD ALIGN="LEFT">brand</TD><TD ALIGN="LEFT">VARCHAR</TD></TR>
+            <TR><TD ALIGN="LEFT">unit</TD><TD ALIGN="LEFT">VARCHAR</TD></TR>
+            <TR><TD ALIGN="LEFT">quantity</TD><TD ALIGN="LEFT">INT</TD></TR>
+            <TR><TD ALIGN="LEFT">purchase_price</TD><TD ALIGN="LEFT">DECIMAL</TD></TR>
+            <TR><TD ALIGN="LEFT">selling_price</TD><TD ALIGN="LEFT">DECIMAL</TD></TR>
+            <TR><TD ALIGN="LEFT">reorder_level</TD><TD ALIGN="LEFT">INT</TD></TR>
+            <TR><TD ALIGN="LEFT">max_stock</TD><TD ALIGN="LEFT">INT</TD></TR>
+            <TR><TD ALIGN="LEFT">vendor_id (FK)</TD><TD ALIGN="LEFT">INT</TD></TR>
+            <TR><TD ALIGN="LEFT">barcode</TD><TD ALIGN="LEFT">VARCHAR</TD></TR>
+            <TR><TD ALIGN="LEFT">is_active</TD><TD ALIGN="LEFT">BOOLEAN</TD></TR>
+        </TABLE>>
+    ];
+
+    PURCHASES [
+        shape=record,
+        style="filled,bold",
+        fillcolor="#fce7f3",
+        color="#db2777",
+        label=<
+        <TABLE BORDER="0" CELLBORDER="0" CELLSPACING="2">
+            <TR><TD COLSPAN="2" BGCOLOR="#db2777"><FONT COLOR="white"><B>PURCHASES</B></FONT></TD></TR>
+            <TR><TD ALIGN="LEFT"><U>id (PK)</U></TD><TD ALIGN="LEFT">INT</TD></TR>
+            <TR><TD ALIGN="LEFT">purchase_number (UK)</TD><TD ALIGN="LEFT">VARCHAR</TD></TR>
+            <TR><TD ALIGN="LEFT">vendor_id (FK)</TD><TD ALIGN="LEFT">INT</TD></TR>
+            <TR><TD ALIGN="LEFT">purchase_date</TD><TD ALIGN="LEFT">DATE</TD></TR>
+            <TR><TD ALIGN="LEFT">payment_due_date</TD><TD ALIGN="LEFT">DATE</TD></TR>
+            <TR><TD ALIGN="LEFT">subtotal</TD><TD ALIGN="LEFT">DECIMAL</TD></TR>
+            <TR><TD ALIGN="LEFT">tax_amount</TD><TD ALIGN="LEFT">DECIMAL</TD></TR>
+            <TR><TD ALIGN="LEFT">discount_amount</TD><TD ALIGN="LEFT">DECIMAL</TD></TR>
+            <TR><TD ALIGN="LEFT">total_amount</TD><TD ALIGN="LEFT">DECIMAL</TD></TR>
+            <TR><TD ALIGN="LEFT">amount_paid</TD><TD ALIGN="LEFT">DECIMAL</TD></TR>
+            <TR><TD ALIGN="LEFT">payment_status</TD><TD ALIGN="LEFT">ENUM</TD></TR>
+            <TR><TD ALIGN="LEFT">order_status</TD><TD ALIGN="LEFT">ENUM</TD></TR>
+            <TR><TD ALIGN="LEFT">received_by (FK)</TD><TD ALIGN="LEFT">INT</TD></TR>
+        </TABLE>>
+    ];
+
+    INVOICES [
+        shape=record,
+        style="filled,bold",
+        fillcolor="#ede9fe",
+        color="#7c3aed",
+        label=<
+        <TABLE BORDER="0" CELLBORDER="0" CELLSPACING="2">
+            <TR><TD COLSPAN="2" BGCOLOR="#7c3aed"><FONT COLOR="white"><B>INVOICES</B></FONT></TD></TR>
+            <TR><TD ALIGN="LEFT"><U>id (PK)</U></TD><TD ALIGN="LEFT">INT</TD></TR>
+            <TR><TD ALIGN="LEFT">invoice_number (UK)</TD><TD ALIGN="LEFT">VARCHAR</TD></TR>
+            <TR><TD ALIGN="LEFT">customer_id (FK)</TD><TD ALIGN="LEFT">INT</TD></TR>
+            <TR><TD ALIGN="LEFT">invoice_date</TD><TD ALIGN="LEFT">DATE</TD></TR>
+            <TR><TD ALIGN="LEFT">due_date</TD><TD ALIGN="LEFT">DATE</TD></TR>
+            <TR><TD ALIGN="LEFT">subtotal</TD><TD ALIGN="LEFT">DECIMAL</TD></TR>
+            <TR><TD ALIGN="LEFT">tax_rate / tax_amount</TD><TD ALIGN="LEFT">DECIMAL</TD></TR>
+            <TR><TD ALIGN="LEFT">discount_rate / amount</TD><TD ALIGN="LEFT">DECIMAL</TD></TR>
+            <TR><TD ALIGN="LEFT">total_amount</TD><TD ALIGN="LEFT">DECIMAL</TD></TR>
+            <TR><TD ALIGN="LEFT">amount_paid</TD><TD ALIGN="LEFT">DECIMAL</TD></TR>
+            <TR><TD ALIGN="LEFT">payment_mode</TD><TD ALIGN="LEFT">ENUM</TD></TR>
+            <TR><TD ALIGN="LEFT">payment_status</TD><TD ALIGN="LEFT">ENUM</TD></TR>
+            <TR><TD ALIGN="LEFT">created_by (FK)</TD><TD ALIGN="LEFT">INT</TD></TR>
+        </TABLE>>
+    ];
+
+    PURCHASE_ITEMS [
+        shape=record,
+        style="filled,bold",
+        fillcolor="#fff1f2",
+        color="#e11d48",
+        label=<
+        <TABLE BORDER="0" CELLBORDER="0" CELLSPACING="2">
+            <TR><TD COLSPAN="2" BGCOLOR="#e11d48"><FONT COLOR="white"><B>PURCHASE_ITEMS</B></FONT></TD></TR>
+            <TR><TD ALIGN="LEFT"><U>id (PK)</U></TD><TD ALIGN="LEFT">INT</TD></TR>
+            <TR><TD ALIGN="LEFT">purchase_id (FK)</TD><TD ALIGN="LEFT">INT</TD></TR>
+            <TR><TD ALIGN="LEFT">product_id (FK)</TD><TD ALIGN="LEFT">INT</TD></TR>
+            <TR><TD ALIGN="LEFT">quantity</TD><TD ALIGN="LEFT">INT</TD></TR>
+            <TR><TD ALIGN="LEFT">purchase_price</TD><TD ALIGN="LEFT">DECIMAL</TD></TR>
+            <TR><TD ALIGN="LEFT">total</TD><TD ALIGN="LEFT">DECIMAL</TD></TR>
+        </TABLE>>
+    ];
+
+    INVOICE_ITEMS [
+        shape=record,
+        style="filled,bold",
+        fillcolor="#f3e8ff",
+        color="#9333ea",
+        label=<
+        <TABLE BORDER="0" CELLBORDER="0" CELLSPACING="2">
+            <TR><TD COLSPAN="2" BGCOLOR="#9333ea"><FONT COLOR="white"><B>INVOICE_ITEMS</B></FONT></TD></TR>
+            <TR><TD ALIGN="LEFT"><U>id (PK)</U></TD><TD ALIGN="LEFT">INT</TD></TR>
+            <TR><TD ALIGN="LEFT">invoice_id (FK)</TD><TD ALIGN="LEFT">INT</TD></TR>
+            <TR><TD ALIGN="LEFT">product_id (FK)</TD><TD ALIGN="LEFT">INT</TD></TR>
+            <TR><TD ALIGN="LEFT">quantity</TD><TD ALIGN="LEFT">INT</TD></TR>
+            <TR><TD ALIGN="LEFT">unit_price</TD><TD ALIGN="LEFT">DECIMAL</TD></TR>
+            <TR><TD ALIGN="LEFT">discount</TD><TD ALIGN="LEFT">DECIMAL</TD></TR>
+            <TR><TD ALIGN="LEFT">total</TD><TD ALIGN="LEFT">DECIMAL</TD></TR>
+        </TABLE>>
+    ];
+
+    PURCHASE_PAYMENTS [
+        shape=record,
+        style="filled,bold",
+        fillcolor="#fef9c3",
+        color="#ca8a04",
+        label=<
+        <TABLE BORDER="0" CELLBORDER="0" CELLSPACING="2">
+            <TR><TD COLSPAN="2" BGCOLOR="#ca8a04"><FONT COLOR="white"><B>PURCHASE_PAYMENTS</B></FONT></TD></TR>
+            <TR><TD ALIGN="LEFT"><U>id (PK)</U></TD><TD ALIGN="LEFT">INT</TD></TR>
+            <TR><TD ALIGN="LEFT">purchase_id (FK)</TD><TD ALIGN="LEFT">INT</TD></TR>
+            <TR><TD ALIGN="LEFT">payment_date</TD><TD ALIGN="LEFT">DATE</TD></TR>
+            <TR><TD ALIGN="LEFT">amount</TD><TD ALIGN="LEFT">DECIMAL</TD></TR>
+            <TR><TD ALIGN="LEFT">payment_mode</TD><TD ALIGN="LEFT">ENUM</TD></TR>
+            <TR><TD ALIGN="LEFT">reference_no</TD><TD ALIGN="LEFT">VARCHAR</TD></TR>
+            <TR><TD ALIGN="LEFT">created_by (FK)</TD><TD ALIGN="LEFT">INT</TD></TR>
+        </TABLE>>
+    ];
+
+    INVOICE_PAYMENTS [
+        shape=record,
+        style="filled,bold",
+        fillcolor="#fef9c3",
+        color="#ca8a04",
+        label=<
+        <TABLE BORDER="0" CELLBORDER="0" CELLSPACING="2">
+            <TR><TD COLSPAN="2" BGCOLOR="#ca8a04"><FONT COLOR="white"><B>INVOICE_PAYMENTS</B></FONT></TD></TR>
+            <TR><TD ALIGN="LEFT"><U>id (PK)</U></TD><TD ALIGN="LEFT">INT</TD></TR>
+            <TR><TD ALIGN="LEFT">invoice_id (FK)</TD><TD ALIGN="LEFT">INT</TD></TR>
+            <TR><TD ALIGN="LEFT">payment_date</TD><TD ALIGN="LEFT">DATE</TD></TR>
+            <TR><TD ALIGN="LEFT">amount</TD><TD ALIGN="LEFT">DECIMAL</TD></TR>
+            <TR><TD ALIGN="LEFT">payment_mode</TD><TD ALIGN="LEFT">ENUM</TD></TR>
+            <TR><TD ALIGN="LEFT">reference_no</TD><TD ALIGN="LEFT">VARCHAR</TD></TR>
+            <TR><TD ALIGN="LEFT">created_by (FK)</TD><TD ALIGN="LEFT">INT</TD></TR>
+        </TABLE>>
+    ];
+
+    INVENTORY_MOVEMENTS [
+        shape=record,
+        style="filled,bold",
+        fillcolor="#e0f2fe",
+        color="#0284c7",
+        label=<
+        <TABLE BORDER="0" CELLBORDER="0" CELLSPACING="2">
+            <TR><TD COLSPAN="2" BGCOLOR="#0284c7"><FONT COLOR="white"><B>INVENTORY_MOVEMENTS</B></FONT></TD></TR>
+            <TR><TD ALIGN="LEFT"><U>id (PK)</U></TD><TD ALIGN="LEFT">INT</TD></TR>
+            <TR><TD ALIGN="LEFT">product_id (FK)</TD><TD ALIGN="LEFT">INT</TD></TR>
+            <TR><TD ALIGN="LEFT">movement_type</TD><TD ALIGN="LEFT">ENUM</TD></TR>
+            <TR><TD ALIGN="LEFT">quantity</TD><TD ALIGN="LEFT">INT</TD></TR>
+            <TR><TD ALIGN="LEFT">reference_type</TD><TD ALIGN="LEFT">ENUM</TD></TR>
+            <TR><TD ALIGN="LEFT">reference_id</TD><TD ALIGN="LEFT">INT</TD></TR>
+            <TR><TD ALIGN="LEFT">previous_quantity</TD><TD ALIGN="LEFT">INT</TD></TR>
+            <TR><TD ALIGN="LEFT">new_quantity</TD><TD ALIGN="LEFT">INT</TD></TR>
+            <TR><TD ALIGN="LEFT">created_by (FK)</TD><TD ALIGN="LEFT">INT</TD></TR>
+        </TABLE>>
+    ];
+
+    AUDIT_LOGS [
+        shape=record,
+        style="filled,bold",
+        fillcolor="#f1f5f9",
+        color="#475569",
+        label=<
+        <TABLE BORDER="0" CELLBORDER="0" CELLSPACING="2">
+            <TR><TD COLSPAN="2" BGCOLOR="#475569"><FONT COLOR="white"><B>AUDIT_LOGS</B></FONT></TD></TR>
+            <TR><TD ALIGN="LEFT"><U>id (PK)</U></TD><TD ALIGN="LEFT">INT</TD></TR>
+            <TR><TD ALIGN="LEFT">user_id (FK)</TD><TD ALIGN="LEFT">INT</TD></TR>
+            <TR><TD ALIGN="LEFT">action</TD><TD ALIGN="LEFT">VARCHAR</TD></TR>
+            <TR><TD ALIGN="LEFT">entity_type</TD><TD ALIGN="LEFT">VARCHAR</TD></TR>
+            <TR><TD ALIGN="LEFT">entity_id</TD><TD ALIGN="LEFT">INT</TD></TR>
+            <TR><TD ALIGN="LEFT">old_values</TD><TD ALIGN="LEFT">JSON</TD></TR>
+            <TR><TD ALIGN="LEFT">new_values</TD><TD ALIGN="LEFT">JSON</TD></TR>
+            <TR><TD ALIGN="LEFT">ip_address</TD><TD ALIGN="LEFT">VARCHAR</TD></TR>
+        </TABLE>>
+    ];
+
+    SYSTEM_CONFIG [
+        shape=record,
+        style="filled,bold",
+        fillcolor="#f1f5f9",
+        color="#475569",
+        label=<
+        <TABLE BORDER="0" CELLBORDER="0" CELLSPACING="2">
+            <TR><TD COLSPAN="2" BGCOLOR="#475569"><FONT COLOR="white"><B>SYSTEM_CONFIG</B></FONT></TD></TR>
+            <TR><TD ALIGN="LEFT"><U>id (PK)</U></TD><TD ALIGN="LEFT">INT</TD></TR>
+            <TR><TD ALIGN="LEFT">config_key (UK)</TD><TD ALIGN="LEFT">VARCHAR</TD></TR>
+            <TR><TD ALIGN="LEFT">config_value</TD><TD ALIGN="LEFT">TEXT</TD></TR>
+            <TR><TD ALIGN="LEFT">description</TD><TD ALIGN="LEFT">VARCHAR</TD></TR>
+        </TABLE>>
+    ];
+
+
+    // ========== EER: GENERALIZATION / SPECIALIZATION (ISA) ==========
+
+    // --- User Specialization: Admin / Staff (Total, Disjoint) ---
+    ISA_USER [
+        shape=triangle,
+        style=filled,
+        fillcolor="#93c5fd",
+        color="#2563eb",
+        label="ISA\n(d, total)",
+        width=1.2,
+        height=0.8,
+        fontsize=10
+    ];
+    ADMIN [
+        shape=record,
+        style="filled,rounded",
+        fillcolor="#bfdbfe",
+        color="#2563eb",
+        label=<
+        <TABLE BORDER="0" CELLBORDER="0" CELLSPACING="2">
+            <TR><TD BGCOLOR="#3b82f6"><FONT COLOR="white"><B>ADMIN</B></FONT></TD></TR>
+            <TR><TD ALIGN="LEFT">manage_users</TD></TR>
+            <TR><TD ALIGN="LEFT">manage_settings</TD></TR>
+            <TR><TD ALIGN="LEFT">view_audit_logs</TD></TR>
+        </TABLE>>
+    ];
+    STAFF [
+        shape=record,
+        style="filled,rounded",
+        fillcolor="#bfdbfe",
+        color="#2563eb",
+        label=<
+        <TABLE BORDER="0" CELLBORDER="0" CELLSPACING="2">
+            <TR><TD BGCOLOR="#3b82f6"><FONT COLOR="white"><B>STAFF</B></FONT></TD></TR>
+            <TR><TD ALIGN="LEFT">create_invoices</TD></TR>
+            <TR><TD ALIGN="LEFT">manage_inventory</TD></TR>
+            <TR><TD ALIGN="LEFT">record_purchases</TD></TR>
+        </TABLE>>
+    ];
+
+    USERS -> ISA_USER [arrowhead=none, penwidth=2, color="#2563eb"];
+    ISA_USER -> ADMIN [penwidth=2, color="#2563eb"];
+    ISA_USER -> STAFF [penwidth=2, color="#2563eb"];
+
+
+    // --- Party Generalization: Vendors & Customers (Partial, Disjoint) ---
+    ISA_PARTY [
+        shape=triangle,
+        style=filled,
+        fillcolor="#86efac",
+        color="#16a34a",
+        label="ISA\n(d, partial)",
+        width=1.3,
+        height=0.8,
+        fontsize=10
+    ];
+    PARTY [
+        shape=record,
+        style="filled,bold,rounded",
+        fillcolor="#bbf7d0",
+        color="#16a34a",
+        label=<
+        <TABLE BORDER="0" CELLBORDER="0" CELLSPACING="2">
+            <TR><TD BGCOLOR="#22c55e"><FONT COLOR="white"><B>PARTY (Superclass)</B></FONT></TD></TR>
+            <TR><TD ALIGN="LEFT">name</TD></TR>
+            <TR><TD ALIGN="LEFT">phone</TD></TR>
+            <TR><TD ALIGN="LEFT">email</TD></TR>
+            <TR><TD ALIGN="LEFT">address / city / state</TD></TR>
+            <TR><TD ALIGN="LEFT">gst_number / tax_id</TD></TR>
+            <TR><TD ALIGN="LEFT">status</TD></TR>
+        </TABLE>>
+    ];
+
+    PARTY -> ISA_PARTY [arrowhead=none, penwidth=2, color="#16a34a"];
+    ISA_PARTY -> VENDORS [penwidth=2, color="#16a34a"];
+    ISA_PARTY -> CUSTOMERS [penwidth=2, color="#16a34a"];
+
+
+    // --- Payment Generalization: Purchase_Payments & Invoice_Payments (Total, Disjoint) ---
+    ISA_PAYMENT [
+        shape=triangle,
+        style=filled,
+        fillcolor="#fde68a",
+        color="#ca8a04",
+        label="ISA\n(d, total)",
+        width=1.2,
+        height=0.8,
+        fontsize=10
+    ];
+    PAYMENT [
+        shape=record,
+        style="filled,bold,rounded",
+        fillcolor="#fef9c3",
+        color="#ca8a04",
+        label=<
+        <TABLE BORDER="0" CELLBORDER="0" CELLSPACING="2">
+            <TR><TD BGCOLOR="#eab308"><FONT COLOR="white"><B>PAYMENT (Superclass)</B></FONT></TD></TR>
+            <TR><TD ALIGN="LEFT">payment_date</TD></TR>
+            <TR><TD ALIGN="LEFT">amount</TD></TR>
+            <TR><TD ALIGN="LEFT">payment_mode</TD></TR>
+            <TR><TD ALIGN="LEFT">reference_no</TD></TR>
+            <TR><TD ALIGN="LEFT">notes</TD></TR>
+            <TR><TD ALIGN="LEFT">created_by</TD></TR>
+        </TABLE>>
+    ];
+
+    PAYMENT -> ISA_PAYMENT [arrowhead=none, penwidth=2, color="#ca8a04"];
+    ISA_PAYMENT -> PURCHASE_PAYMENTS [penwidth=2, color="#ca8a04"];
+    ISA_PAYMENT -> INVOICE_PAYMENTS [penwidth=2, color="#ca8a04"];
+
+
+    // --- Transaction Items Generalization: Purchase_Items & Invoice_Items ---
+    ISA_ITEMS [
+        shape=triangle,
+        style=filled,
+        fillcolor="#f9a8d4",
+        color="#be185d",
+        label="ISA\n(d, total)",
+        width=1.2,
+        height=0.8,
+        fontsize=10
+    ];
+    TRANSACTION_ITEM [
+        shape=record,
+        style="filled,bold,rounded",
+        fillcolor="#fce7f3",
+        color="#be185d",
+        label=<
+        <TABLE BORDER="0" CELLBORDER="0" CELLSPACING="2">
+            <TR><TD BGCOLOR="#ec4899"><FONT COLOR="white"><B>TRANSACTION_ITEM (Superclass)</B></FONT></TD></TR>
+            <TR><TD ALIGN="LEFT">product_id (FK)</TD></TR>
+            <TR><TD ALIGN="LEFT">quantity</TD></TR>
+            <TR><TD ALIGN="LEFT">price</TD></TR>
+            <TR><TD ALIGN="LEFT">total</TD></TR>
+        </TABLE>>
+    ];
+
+    TRANSACTION_ITEM -> ISA_ITEMS [arrowhead=none, penwidth=2, color="#be185d"];
+    ISA_ITEMS -> PURCHASE_ITEMS [penwidth=2, color="#be185d"];
+    ISA_ITEMS -> INVOICE_ITEMS [penwidth=2, color="#be185d"];
+
+
+    // ========== RELATIONSHIP DIAMONDS ==========
+
+    // --- Supplies (Vendor -> Product) ---
+    REL_SUPPLIES [
+        shape=diamond,
+        style=filled,
+        fillcolor="#d1fae5",
+        color="#059669",
+        label="Supplies",
+        width=1.5,
+        height=0.8,
+        fontsize=10
+    ];
+    VENDORS -> REL_SUPPLIES [arrowhead=none, label="1", penwidth=1.5, color="#059669"];
+    REL_SUPPLIES -> PRODUCTS [arrowhead=none, label="N", penwidth=1.5, color="#059669"];
+
+    // --- Sells_To (Vendor -> Purchase) ---
+    REL_SELLS [
+        shape=diamond,
+        style=filled,
+        fillcolor="#d1fae5",
+        color="#059669",
+        label="Sells To",
+        width=1.5,
+        height=0.8,
+        fontsize=10
+    ];
+    VENDORS -> REL_SELLS [arrowhead=none, label="1", penwidth=1.5, color="#059669"];
+    REL_SELLS -> PURCHASES [arrowhead=none, label="N", penwidth=1.5, color="#059669"];
+
+    // --- Buys_From (Customer -> Invoice) ---
+    REL_BUYS [
+        shape=diamond,
+        style=filled,
+        fillcolor="#ede9fe",
+        color="#7c3aed",
+        label="Buys From",
+        width=1.5,
+        height=0.8,
+        fontsize=10
+    ];
+    CUSTOMERS -> REL_BUYS [arrowhead=none, label="1", penwidth=1.5, color="#7c3aed"];
+    REL_BUYS -> INVOICES [arrowhead=none, label="N", penwidth=1.5, color="#7c3aed"];
+
+    // --- Contains (Purchase -> Purchase_Items) ---
+    REL_PUR_CONTAINS [
+        shape=diamond,
+        style=filled,
+        fillcolor="#fce7f3",
+        color="#db2777",
+        label="Contains",
+        width=1.3,
+        height=0.7,
+        fontsize=10
+    ];
+    PURCHASES -> REL_PUR_CONTAINS [arrowhead=none, label="1", penwidth=1.5, color="#db2777"];
+    REL_PUR_CONTAINS -> PURCHASE_ITEMS [arrowhead=none, label="N", penwidth=1.5, color="#db2777"];
+
+    // --- Contains (Invoice -> Invoice_Items) ---
+    REL_INV_CONTAINS [
+        shape=diamond,
+        style=filled,
+        fillcolor="#ede9fe",
+        color="#9333ea",
+        label="Contains",
+        width=1.3,
+        height=0.7,
+        fontsize=10
+    ];
+    INVOICES -> REL_INV_CONTAINS [arrowhead=none, label="1", penwidth=1.5, color="#9333ea"];
+    REL_INV_CONTAINS -> INVOICE_ITEMS [arrowhead=none, label="N", penwidth=1.5, color="#9333ea"];
+
+    // --- Included_In (Product -> Purchase_Items) ---
+    REL_PROD_PUR [
+        shape=diamond,
+        style=filled,
+        fillcolor="#fef3c7",
+        color="#d97706",
+        label="Included In",
+        width=1.5,
+        height=0.7,
+        fontsize=10
+    ];
+    PRODUCTS -> REL_PROD_PUR [arrowhead=none, label="1", penwidth=1.5, color="#d97706"];
+    REL_PROD_PUR -> PURCHASE_ITEMS [arrowhead=none, label="N", penwidth=1.5, color="#d97706"];
+
+    // --- Included_In (Product -> Invoice_Items) ---
+    REL_PROD_INV [
+        shape=diamond,
+        style=filled,
+        fillcolor="#fef3c7",
+        color="#d97706",
+        label="Included In",
+        width=1.5,
+        height=0.7,
+        fontsize=10
+    ];
+    PRODUCTS -> REL_PROD_INV [arrowhead=none, label="1", penwidth=1.5, color="#d97706"];
+    REL_PROD_INV -> INVOICE_ITEMS [arrowhead=none, label="N", penwidth=1.5, color="#d97706"];
+
+    // --- Tracks (Product -> Inventory_Movements) ---
+    REL_TRACKS [
+        shape=diamond,
+        style=filled,
+        fillcolor="#e0f2fe",
+        color="#0284c7",
+        label="Tracked By",
+        width=1.5,
+        height=0.7,
+        fontsize=10
+    ];
+    PRODUCTS -> REL_TRACKS [arrowhead=none, label="1", penwidth=1.5, color="#0284c7"];
+    REL_TRACKS -> INVENTORY_MOVEMENTS [arrowhead=none, label="N", penwidth=1.5, color="#0284c7"];
+
+    // --- Receives (User -> Purchase) ---
+    REL_RECEIVES [
+        shape=diamond,
+        style=filled,
+        fillcolor="#dbeafe",
+        color="#2563eb",
+        label="Receives",
+        width=1.3,
+        height=0.7,
+        fontsize=10
+    ];
+    USERS -> REL_RECEIVES [arrowhead=none, label="1", penwidth=1.5, color="#2563eb"];
+    REL_RECEIVES -> PURCHASES [arrowhead=none, label="N", penwidth=1.5, color="#2563eb"];
+
+    // --- Creates (User -> Invoice) ---
+    REL_CREATES [
+        shape=diamond,
+        style=filled,
+        fillcolor="#dbeafe",
+        color="#2563eb",
+        label="Creates",
+        width=1.3,
+        height=0.7,
+        fontsize=10
+    ];
+    USERS -> REL_CREATES [arrowhead=none, label="1", penwidth=1.5, color="#2563eb"];
+    REL_CREATES -> INVOICES [arrowhead=none, label="N", penwidth=1.5, color="#2563eb"];
+
+    // --- Performs (User -> Inventory_Movements) ---
+    REL_PERFORMS [
+        shape=diamond,
+        style=filled,
+        fillcolor="#dbeafe",
+        color="#2563eb",
+        label="Performs",
+        width=1.3,
+        height=0.7,
+        fontsize=10
+    ];
+    USERS -> REL_PERFORMS [arrowhead=none, label="1", penwidth=1.5, color="#2563eb"];
+    REL_PERFORMS -> INVENTORY_MOVEMENTS [arrowhead=none, label="N", penwidth=1.5, color="#2563eb"];
+
+    // --- Generates (User -> Audit_Logs) ---
+    REL_GENERATES [
+        shape=diamond,
+        style=filled,
+        fillcolor="#dbeafe",
+        color="#2563eb",
+        label="Generates",
+        width=1.3,
+        height=0.7,
+        fontsize=10
+    ];
+    USERS -> REL_GENERATES [arrowhead=none, label="1", penwidth=1.5, color="#2563eb"];
+    REL_GENERATES -> AUDIT_LOGS [arrowhead=none, label="N", penwidth=1.5, color="#2563eb"];
+
+    // --- Paid Via (Purchase -> Purchase_Payments) ---
+    REL_PUR_PAID [
+        shape=diamond,
+        style=filled,
+        fillcolor="#fef9c3",
+        color="#ca8a04",
+        label="Paid Via",
+        width=1.3,
+        height=0.7,
+        fontsize=10
+    ];
+    PURCHASES -> REL_PUR_PAID [arrowhead=none, label="1", penwidth=1.5, color="#ca8a04"];
+    REL_PUR_PAID -> PURCHASE_PAYMENTS [arrowhead=none, label="N", penwidth=1.5, color="#ca8a04"];
+
+    // ---  Paid Via (Invoice -> Invoice_Payments) ---
+    REL_INV_PAID [
+        shape=diamond,
+        style=filled,
+        fillcolor="#fef9c3",
+        color="#ca8a04",
+        label="Paid Via",
+        width=1.3,
+        height=0.7,
+        fontsize=10
+    ];
+    INVOICES -> REL_INV_PAID [arrowhead=none, label="1", penwidth=1.5, color="#ca8a04"];
+    REL_INV_PAID -> INVOICE_PAYMENTS [arrowhead=none, label="N", penwidth=1.5, color="#ca8a04"];
+
+
+    // ========== AGGREGATION (double diamond) ==========
+    // Purchase with its items forms an aggregation
+    // Invoice with its items forms an aggregation
+
+    subgraph cluster_purchase_agg {
+        label="<< Aggregation: Purchase Order >>";
+        style="dashed,rounded";
+        color="#db2777";
+        fontcolor="#db2777";
+        fontsize=12;
+        PURCHASES;
+        REL_PUR_CONTAINS;
+        PURCHASE_ITEMS;
+    }
+
+    subgraph cluster_invoice_agg {
+        label="<< Aggregation: Sales Invoice >>";
+        style="dashed,rounded";
+        color="#7c3aed";
+        fontcolor="#7c3aed";
+        fontsize=12;
+        INVOICES;
+        REL_INV_CONTAINS;
+        INVOICE_ITEMS;
+    }
+
+
+    // ========== LEGEND ==========
+    subgraph cluster_legend {
+        label="Legend";
+        style="filled,rounded";
+        fillcolor="#f8fafc";
+        color="#94a3b8";
+        fontsize=14;
+        fontcolor="#1e293b";
+        node [shape=plaintext, fontsize=10];
+        
+        LEGEND [label=<
+        <TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="6">
+            <TR><TD COLSPAN="2" BGCOLOR="#334155"><FONT COLOR="white"><B>EER Diagram Legend</B></FONT></TD></TR>
+            <TR><TD BGCOLOR="#dbeafe">Rectangle</TD><TD>Entity</TD></TR>
+            <TR><TD BGCOLOR="#bbf7d0">Rounded Rect</TD><TD>Superclass (Generalization)</TD></TR>
+            <TR><TD>&#9674; Diamond</TD><TD>Relationship</TD></TR>
+            <TR><TD>&#9651; Triangle</TD><TD>ISA (Specialization)</TD></TR>
+            <TR><TD>- - Dashed Box - -</TD><TD>Aggregation</TD></TR>
+            <TR><TD>(d, total)</TD><TD>Disjoint, Total Participation</TD></TR>
+            <TR><TD>(d, partial)</TD><TD>Disjoint, Partial Participation</TD></TR>
+            <TR><TD><U>Underlined</U></TD><TD>Primary Key</TD></TR>
+            <TR><TD>1 ── N</TD><TD>One-to-Many Cardinality</TD></TR>
+        </TABLE>>];
+    }
+}

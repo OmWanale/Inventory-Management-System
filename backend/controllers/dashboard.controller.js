@@ -24,7 +24,8 @@ exports.getStats = async (req, res) => {
     const currentMonth = new Date().toISOString().slice(0, 7);
     
     const [[purchaseStats]] = await pool.query(
-      `SELECT COUNT(*) as count, COALESCE(SUM(total_amount), 0) as total
+      `SELECT COUNT(*) as count, COALESCE(SUM(total_amount), 0) as total,
+        COALESCE(SUM(amount_paid), 0) as paid
        FROM purchases WHERE DATE_FORMAT(purchase_date, '%Y-%m') = ?`,
       [currentMonth]
     );
@@ -38,13 +39,24 @@ exports.getStats = async (req, res) => {
 
     // Pending payments
     const [[pendingPurchases]] = await pool.query(
-      `SELECT COUNT(*) as count, COALESCE(SUM(total_amount), 0) as total
+      `SELECT COUNT(*) as count, COALESCE(SUM(total_amount - amount_paid), 0) as total
        FROM purchases WHERE payment_status != 'paid'`
     );
 
     const [[pendingInvoices]] = await pool.query(
       `SELECT COUNT(*) as count, COALESCE(SUM(total_amount - amount_paid), 0) as total
        FROM invoices WHERE payment_status != 'paid'`
+    );
+
+    // Overdue counts
+    const [[overduePurchases]] = await pool.query(
+      `SELECT COUNT(*) as count, COALESCE(SUM(total_amount - amount_paid), 0) as total
+       FROM purchases WHERE payment_status != 'paid' AND payment_due_date < CURDATE()`
+    );
+
+    const [[overdueInvoices]] = await pool.query(
+      `SELECT COUNT(*) as count, COALESCE(SUM(total_amount - amount_paid), 0) as total
+       FROM invoices WHERE payment_status != 'paid' AND due_date < CURDATE()`
     );
 
     res.json({
@@ -58,12 +70,16 @@ exports.getStats = async (req, res) => {
         vendors: { total: vendorStats.totalVendors },
         customers: { total: customerStats.totalCustomers },
         currentMonth: {
-          purchases: { count: purchaseStats.count, total: purchaseStats.total },
+          purchases: { count: purchaseStats.count, total: purchaseStats.total, paid: purchaseStats.paid },
           sales: { count: salesStats.count, total: salesStats.total, collected: salesStats.collected }
         },
         pending: {
           purchases: { count: pendingPurchases.count, total: pendingPurchases.total },
           invoices: { count: pendingInvoices.count, total: pendingInvoices.total }
+        },
+        overdue: {
+          purchases: { count: overduePurchases.count, total: overduePurchases.total },
+          invoices: { count: overdueInvoices.count, total: overdueInvoices.total }
         }
       }
     });

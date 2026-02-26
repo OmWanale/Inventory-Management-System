@@ -19,7 +19,7 @@ const Purchases = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [purchases, setPurchases] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [pagination, setPagination] = useState({ page: 1, totalPages: 1 });
+  const [pagination, setPagination] = useState({ page: 1, pages: 1 });
   const [deleteId, setDeleteId] = useState(null);
   const [filters, setFilters] = useState({
     search: searchParams.get('search') || '',
@@ -112,7 +112,9 @@ const Purchases = () => {
 
   const getStatusBadge = (status) => {
     const statusClasses = {
-      pending: 'badge-warning',
+      draft: 'badge-gray',
+      ordered: 'badge-info',
+      partially_received: 'badge-warning',
       received: 'badge-success',
       cancelled: 'badge-gray',
     };
@@ -157,10 +159,11 @@ const Purchases = () => {
               onChange={(e) => setFilters({ ...filters, status: e.target.value })}
               className="input"
             >
-              <option value="">All Status</option>
+              <option value="">All Payment Status</option>
               <option value="pending">Pending</option>
-              <option value="received">Received</option>
-              <option value="cancelled">Cancelled</option>
+              <option value="partial">Partial</option>
+              <option value="paid">Paid</option>
+              <option value="overdue">Overdue</option>
             </select>
             <input
               type="date"
@@ -212,9 +215,10 @@ const Purchases = () => {
                     <th className="table-header">PO Number</th>
                     <th className="table-header">Vendor</th>
                     <th className="table-header">Date</th>
-                    <th className="table-header">Items</th>
+                    <th className="table-header">Due Date</th>
                     <th className="table-header">Total</th>
-                    <th className="table-header">Status</th>
+                    <th className="table-header">Paid</th>
+                    <th className="table-header">Order</th>
                     <th className="table-header">Payment</th>
                     <th className="table-header">Actions</th>
                   </tr>
@@ -223,22 +227,29 @@ const Purchases = () => {
                   {purchases.map((purchase) => (
                     <tr key={purchase.id} className="hover:bg-gray-50">
                       <td className="table-cell font-mono text-sm font-medium">
-                        {purchase.po_number}
+                        {purchase.purchase_number || purchase.po_number}
                       </td>
                       <td className="table-cell">{purchase.vendor_name}</td>
                       <td className="table-cell">{formatDate(purchase.purchase_date)}</td>
-                      <td className="table-cell">{purchase.item_count || 0} items</td>
+                      <td className="table-cell">
+                        <span className={purchase.payment_due_date && new Date(purchase.payment_due_date) < new Date() && purchase.computed_payment_status !== 'paid' ? 'text-red-600 font-semibold' : ''}>
+                          {purchase.payment_due_date ? formatDate(purchase.payment_due_date) : '-'}
+                        </span>
+                      </td>
                       <td className="table-cell font-medium">
                         {formatCurrency(purchase.total_amount)}
                       </td>
+                      <td className="table-cell text-green-600 font-medium">
+                        {formatCurrency(purchase.amount_paid || 0)}
+                      </td>
                       <td className="table-cell">
-                        <span className={`badge ${getStatusBadge(purchase.status)}`}>
-                          {purchase.status}
+                        <span className={`badge ${getStatusBadge(purchase.order_status)}`}>
+                          {(purchase.order_status || 'ordered').replace('_', ' ')}
                         </span>
                       </td>
                       <td className="table-cell">
-                        <span className={`badge ${getPaymentBadge(purchase.payment_status)}`}>
-                          {purchase.payment_status}
+                        <span className={`badge ${getPaymentBadge(purchase.computed_payment_status || purchase.payment_status)}`}>
+                          {purchase.computed_payment_status || purchase.payment_status}
                         </span>
                       </td>
                       <td className="table-cell">
@@ -257,7 +268,7 @@ const Purchases = () => {
                           >
                             <DocumentArrowDownIcon className="w-5 h-5" />
                           </button>
-                          {isAdmin() && purchase.status === 'pending' && (
+                          {isAdmin() && purchase.computed_payment_status !== 'paid' && (
                             <button
                               onClick={() => setDeleteId(purchase.id)}
                               className="p-1 text-gray-500 hover:text-red-600"
@@ -275,7 +286,7 @@ const Purchases = () => {
             </div>
             <Pagination
               currentPage={pagination.page}
-              totalPages={pagination.totalPages}
+              totalPages={pagination.pages}
               onPageChange={handlePageChange}
             />
           </>

@@ -160,11 +160,9 @@ const Invoices = () => {
               className="input"
             >
               <option value="">All Status</option>
-              <option value="draft">Draft</option>
-              <option value="sent">Sent</option>
+              <option value="pending">Pending</option>
+              <option value="partial">Partial</option>
               <option value="paid">Paid</option>
-              <option value="overdue">Overdue</option>
-              <option value="cancelled">Cancelled</option>
             </select>
             <input
               type="date"
@@ -216,6 +214,7 @@ const Invoices = () => {
                     <th className="table-header">Date</th>
                     <th className="table-header">Due Date</th>
                     <th className="table-header">Total</th>
+                    <th className="table-header">Paid</th>
                     <th className="table-header">Status</th>
                     <th className="table-header">Payment</th>
                     <th className="table-header">Actions</th>
@@ -229,18 +228,25 @@ const Invoices = () => {
                       </td>
                       <td className="table-cell">{invoice.customer_name}</td>
                       <td className="table-cell">{formatDate(invoice.invoice_date)}</td>
-                      <td className="table-cell">{formatDate(invoice.due_date)}</td>
+                      <td className="table-cell">
+                        <span className={invoice.due_date && new Date(invoice.due_date) < new Date() && (invoice.computed_payment_status || invoice.payment_status) !== 'paid' ? 'text-red-600 font-semibold' : ''}>
+                          {invoice.due_date ? formatDate(invoice.due_date) : '-'}
+                        </span>
+                      </td>
                       <td className="table-cell font-medium">
                         {formatCurrency(invoice.total_amount)}
                       </td>
+                      <td className="table-cell text-green-600 font-medium">
+                        {formatCurrency(invoice.amount_paid || 0)}
+                      </td>
                       <td className="table-cell">
-                        <span className={`badge ${getStatusBadge(invoice.status)}`}>
-                          {invoice.status}
+                        <span className={`badge ${getStatusBadge(invoice.payment_status)}`}>
+                          {invoice.payment_status}
                         </span>
                       </td>
                       <td className="table-cell">
-                        <span className={`badge ${getPaymentBadge(invoice.payment_status)}`}>
-                          {invoice.payment_status}
+                        <span className={`badge ${getPaymentBadge(invoice.computed_payment_status || invoice.payment_status)}`}>
+                          {invoice.computed_payment_status || invoice.payment_status}
                         </span>
                       </td>
                       <td className="table-cell">
@@ -259,7 +265,7 @@ const Invoices = () => {
                           >
                             <DocumentArrowDownIcon className="w-5 h-5" />
                           </button>
-                          {isAdmin() && invoice.status === 'draft' && (
+                          {isAdmin() && (invoice.computed_payment_status || invoice.payment_status) !== 'paid' && (
                             <button
                               onClick={() => setDeleteId(invoice.id)}
                               className="p-1 text-gray-500 hover:text-red-600"

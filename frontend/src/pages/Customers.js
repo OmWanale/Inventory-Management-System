@@ -167,10 +167,10 @@ const Customers = () => {
                       </td>
                       <td className="table-cell">
                         <span className={`font-medium ${
-                          customer.balance > 0 ? 'text-red-600' : 
-                          customer.balance < 0 ? 'text-green-600' : 'text-gray-900'
+                          (customer.outstanding_balance || customer.balance || 0) > 0 ? 'text-red-600' : 
+                          (customer.outstanding_balance || customer.balance || 0) < 0 ? 'text-green-600' : 'text-gray-900'
                         }`}>
-                          {formatCurrency(customer.balance)}
+                          {formatCurrency(customer.outstanding_balance || customer.balance || 0)}
                         </span>
                       </td>
                       <td className="table-cell">

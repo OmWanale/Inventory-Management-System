@@ -27,7 +27,7 @@ const PurchaseForm = () => {
     purchase_date: new Date().toISOString().split('T')[0],
     expected_date: '',
     status: 'pending',
-    payment_status: 'unpaid',
+    payment_status: 'pending',
     notes: '',
     items: [],
   });
@@ -149,10 +149,17 @@ const PurchaseForm = () => {
     try {
       setSaving(true);
       const data = {
-        ...formData,
-        subtotal: calculateSubtotal(),
-        tax_amount: 0,
-        total_amount: calculateSubtotal(),
+        vendorId: formData.vendor_id,
+        purchaseDate: formData.purchase_date,
+        invoiceNumber: '',
+        paymentStatus: formData.payment_status,
+        taxAmount: 0,
+        items: formData.items.map(item => ({
+          productId: item.product_id,
+          quantity: item.quantity,
+          purchasePrice: item.unit_price,
+        })),
+        notes: formData.notes,
       };
 
       if (isEdit) {
@@ -263,7 +270,7 @@ const PurchaseForm = () => {
                     onChange={handleChange}
                     className="input"
                   >
-                    <option value="unpaid">Unpaid</option>
+                    <option value="pending">Pending</option>
                     <option value="partial">Partial</option>
                     <option value="paid">Paid</option>
                   </select>

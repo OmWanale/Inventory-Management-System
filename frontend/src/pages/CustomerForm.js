@@ -40,10 +40,10 @@ const CustomerForm = () => {
         customer_type: customer.customer_type || 'individual',
         email: customer.email || '',
         phone: customer.phone || '',
-        address: customer.address || '',
+        address: customer.billing_address || customer.address || '',
         city: customer.city || '',
         state: customer.state || '',
-        pincode: customer.pincode || '',
+        pincode: customer.postal_code || customer.pincode || '',
         gst_number: customer.gst_number || '',
         credit_limit: customer.credit_limit || 0,
         notes: customer.notes || '',
@@ -72,11 +72,23 @@ const CustomerForm = () => {
 
     try {
       setSaving(true);
+      const data = {
+        name: formData.name,
+        phone: formData.phone,
+        email: formData.email,
+        billingAddress: formData.address,
+        city: formData.city,
+        state: formData.state,
+        postalCode: formData.pincode,
+        gstNumber: formData.gst_number,
+        creditLimit: parseFloat(formData.credit_limit) || 0,
+        notes: formData.notes,
+      };
       if (isEdit) {
-        await customerAPI.update(id, formData);
+        await customerAPI.update(id, data);
         toast.success('Customer updated successfully');
       } else {
-        await customerAPI.create(formData);
+        await customerAPI.create(data);
         toast.success('Customer created successfully');
       }
       navigate('/customers');

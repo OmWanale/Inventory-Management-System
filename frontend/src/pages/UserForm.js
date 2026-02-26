@@ -39,7 +39,7 @@ const UserForm = () => {
         password: '',
         full_name: user.full_name || '',
         role: user.role || 'staff',
-        status: user.status || 'active',
+        status: user.is_active ? 'active' : 'inactive',
         phone: user.phone || '',
       });
     } catch (error) {
@@ -76,11 +76,18 @@ const UserForm = () => {
 
     try {
       setSaving(true);
-      const data = { ...formData };
+      const data = {
+        username: formData.username,
+        email: formData.email,
+        fullName: formData.full_name,
+        role: formData.role,
+        phone: formData.phone,
+        isActive: formData.status === 'active',
+      };
       
-      // Don't send password if empty (for edit mode)
-      if (!data.password) {
-        delete data.password;
+      // Only include password if provided
+      if (formData.password) {
+        data.password = formData.password;
       }
 
       if (isEdit) {

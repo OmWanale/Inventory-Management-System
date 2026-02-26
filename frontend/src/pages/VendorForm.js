@@ -48,9 +48,9 @@ const VendorForm = () => {
         address: vendor.address || '',
         city: vendor.city || '',
         state: vendor.state || '',
-        pincode: vendor.pincode || '',
+        pincode: vendor.postal_code || vendor.pincode || '',
         gst_number: vendor.gst_number || '',
-        pan_number: vendor.pan_number || '',
+        pan_number: vendor.tax_id || vendor.pan_number || '',
         bank_name: vendor.bank_name || '',
         bank_account: vendor.bank_account || '',
         bank_ifsc: vendor.bank_ifsc || '',
@@ -82,11 +82,26 @@ const VendorForm = () => {
 
     try {
       setSaving(true);
+      const data = {
+        name: formData.name,
+        contactPerson: formData.contact_person,
+        phone: formData.phone,
+        email: formData.email,
+        address: formData.address,
+        city: formData.city,
+        state: formData.state,
+        postalCode: formData.pincode,
+        gstNumber: formData.gst_number,
+        taxId: formData.pan_number,
+        paymentTerms: formData.payment_terms,
+        status: formData.status,
+        notes: formData.notes,
+      };
       if (isEdit) {
-        await vendorAPI.update(id, formData);
+        await vendorAPI.update(id, data);
         toast.success('Vendor updated successfully');
       } else {
-        await vendorAPI.create(formData);
+        await vendorAPI.create(data);
         toast.success('Vendor created successfully');
       }
       navigate('/vendors');

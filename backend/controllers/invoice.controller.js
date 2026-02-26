@@ -17,7 +17,7 @@ const generateInvoiceNumber = async () => {
 // Get all invoices
 exports.getAllInvoices = async (req, res) => {
   try {
-    const { search, customer, status, paymentMode, startDate, endDate, page = 1, limit = 10 } = req.query;
+    const { search, customer, status, invoiceStatus, paymentMode, startDate, endDate, page = 1, limit = 10 } = req.query;
     const offset = (page - 1) * limit;
 
     let whereClause = '1=1';
@@ -33,9 +33,17 @@ exports.getAllInvoices = async (req, res) => {
       params.push(customer);
     }
 
-    if (status) {
+    if (status === 'overdue') {
+      whereClause += ' AND i.payment_status != ? AND i.due_date < CURDATE()';
+      params.push('paid');
+    } else if (status) {
       whereClause += ' AND i.payment_status = ?';
       params.push(status);
+    }
+
+    if (invoiceStatus) {
+      whereClause += ' AND i.status = ?';
+      params.push(invoiceStatus);
     }
 
     if (paymentMode) {
@@ -54,7 +62,12 @@ exports.getAllInvoices = async (req, res) => {
     }
 
     const [invoices] = await pool.query(
-      `SELECT i.*, c.name as customer_name, c.phone as customer_phone, u.full_name as created_by_name
+      `SELECT i.*, c.name as customer_name, c.phone as customer_phone, u.full_name as created_by_name,
+        CASE
+          WHEN i.payment_status = 'paid' THEN 'paid'
+          WHEN i.due_date < CURDATE() AND i.payment_status != 'paid' THEN 'overdue'
+          ELSE i.payment_status
+        END as computed_payment_status
        FROM invoices i
        LEFT JOIN customers c ON i.customer_id = c.id
        LEFT JOIN users u ON i.created_by = u.id
@@ -112,11 +125,27 @@ exports.getInvoice = async (req, res) => {
       [req.params.id]
     );
 
+    // Get payment history
+    const [payments] = await pool.query(
+      `SELECT ip.*, u.full_name as created_by_name
+       FROM invoice_payments ip
+       LEFT JOIN users u ON ip.created_by = u.id
+       WHERE ip.invoice_id = ?
+       ORDER BY ip.payment_date DESC`,
+      [req.params.id]
+    );
+
+    const invoice = invoices[0];
+    const computedStatus = invoice.payment_status === 'paid' ? 'paid'
+      : (invoice.due_date && new Date(invoice.due_date) < new Date() ? 'overdue' : invoice.payment_status);
+
     res.json({
       success: true,
       data: {
-        ...invoices[0],
-        items
+        ...invoice,
+        computed_payment_status: computedStatus,
+        items,
+        payments
       }
     });
   } catch (error) {
@@ -137,10 +166,10 @@ exports.createInvoice = async (req, res) => {
       discountAmount, shippingCost, amountPaid, paymentMode, paymentStatus, notes
     } = req.body;
 
-    if (!invoiceDate || !items || items.length === 0) {
+    if (!invoiceDate || !dueDate || !items || items.length === 0) {
       return res.status(400).json({
         success: false,
-        message: 'Invoice date and at least one item are required'
+        message: 'Invoice date, due date, and at least one item are required'
       });
     }
 
@@ -307,6 +336,116 @@ exports.updateInvoicePayment = async (req, res) => {
   }
 };
 
+// Record payment for invoice
+exports.recordPayment = async (req, res) => {
+  const connection = await pool.getConnection();
+  try {
+    await connection.beginTransaction();
+    const invoiceId = req.params.id;
+    const { paymentDate, amount, paymentMode, referenceNo, notes } = req.body;
+
+    const [[invoice]] = await connection.query('SELECT * FROM invoices WHERE id = ?', [invoiceId]);
+    if (!invoice) {
+      await connection.rollback();
+      return res.status(404).json({ success: false, message: 'Invoice not found' });
+    }
+
+    const payAmount = parseFloat(amount);
+    if (!payAmount || payAmount <= 0) {
+      await connection.rollback();
+      return res.status(400).json({ success: false, message: 'Invalid payment amount' });
+    }
+
+    const currentPaid = parseFloat(invoice.amount_paid) || 0;
+    const total = parseFloat(invoice.total_amount);
+    const pendingAmount = Math.round((total - currentPaid) * 100) / 100;
+
+    if (payAmount > pendingAmount + 0.01) {
+      await connection.rollback();
+      return res.status(400).json({
+        success: false,
+        message: `Payment amount (${payAmount}) exceeds pending amount (${pendingAmount})`
+      });
+    }
+
+    // Insert payment record
+    await connection.query(
+      `INSERT INTO invoice_payments (invoice_id, payment_date, amount, payment_mode, reference_no, notes, created_by)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [invoiceId, paymentDate || new Date(), payAmount, paymentMode || 'cash', referenceNo || null, notes || null, req.user.id]
+    );
+
+    // Recalculate from payment records
+    const [[{ totalPaid }]] = await connection.query(
+      'SELECT COALESCE(SUM(amount), 0) as totalPaid FROM invoice_payments WHERE invoice_id = ?',
+      [invoiceId]
+    );
+
+    const newPaid = parseFloat(totalPaid);
+    let newStatus = 'pending';
+    if (newPaid >= total) newStatus = 'paid';
+    else if (newPaid > 0) newStatus = 'partial';
+
+    await connection.query(
+      'UPDATE invoices SET amount_paid = ?, payment_status = ?, payment_mode = ? WHERE id = ?',
+      [newPaid, newStatus, paymentMode || 'cash', invoiceId]
+    );
+
+    // Update customer outstanding balance
+    if (invoice.customer_id) {
+      await connection.query(
+        'UPDATE customers SET outstanding_balance = outstanding_balance - ? WHERE id = ?',
+        [payAmount, invoice.customer_id]
+      );
+    }
+
+    await connection.commit();
+
+    await createAuditLog(req.user.id, 'RECORD_PAYMENT', 'invoices', invoiceId,
+      { amount_paid: currentPaid }, { amount_paid: newPaid, payment: payAmount }, req);
+
+    res.json({ success: true, message: 'Payment recorded successfully' });
+  } catch (error) {
+    await connection.rollback();
+    console.error('Record invoice payment error:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  } finally {
+    connection.release();
+  }
+};
+
+// Get payments for an invoice
+exports.getPayments = async (req, res) => {
+  try {
+    const [payments] = await pool.query(
+      `SELECT ip.*, u.full_name as created_by_name
+       FROM invoice_payments ip
+       LEFT JOIN users u ON ip.created_by = u.id
+       WHERE ip.invoice_id = ?
+       ORDER BY ip.payment_date DESC`,
+      [req.params.id]
+    );
+
+    const [[invoice]] = await pool.query(
+      'SELECT total_amount, amount_paid FROM invoices WHERE id = ?',
+      [req.params.id]
+    );
+
+    res.json({
+      success: true,
+      data: payments,
+      summary: {
+        totalAmount: invoice?.total_amount || 0,
+        totalPaid: invoice?.amount_paid || 0,
+        pending: (invoice?.total_amount || 0) - (invoice?.amount_paid || 0)
+      }
+    });
+  } catch (error) {
+    console.error('Get invoice payments error:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
 // Delete invoice (with stock rollback)
 exports.deleteInvoice = async (req, res) => {
   const connection = await pool.getConnection();
@@ -318,6 +457,19 @@ exports.deleteInvoice = async (req, res) => {
     const [invoice] = await connection.query('SELECT * FROM invoices WHERE id = ?', [invoiceId]);
     if (invoice.length === 0) {
       return res.status(404).json({ success: false, message: 'Invoice not found' });
+    }
+
+    // Check if payments exist
+    const [[{ paymentCount }]] = await connection.query(
+      'SELECT COUNT(*) as paymentCount FROM invoice_payments WHERE invoice_id = ?',
+      [invoiceId]
+    );
+    if (paymentCount > 0) {
+      await connection.rollback();
+      return res.status(400).json({
+        success: false,
+        message: 'Cannot delete invoice with recorded payments. Remove payments first.'
+      });
     }
 
     // Get invoice items

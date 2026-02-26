@@ -153,9 +153,9 @@ const Users = () => {
                       </td>
                       <td className="table-cell">
                         <span className={`badge ${
-                          user.status === 'active' ? 'badge-success' : 'badge-gray'
+                          user.is_active ? 'badge-success' : 'badge-gray'
                         }`}>
-                          {user.status}
+                          {user.is_active ? 'Active' : 'Inactive'}
                         </span>
                       </td>
                       <td className="table-cell">{formatDate(user.last_login)}</td>

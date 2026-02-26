@@ -1,7 +1,7 @@
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5001/api';
 
 const api = axios.create({
   baseURL: API_URL,
@@ -28,8 +28,6 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    const message = error.response?.data?.message || 'An error occurred';
-    
     if (error.response?.status === 401) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
@@ -108,6 +106,10 @@ export const purchaseAPI = {
   create: (data) => api.post('/purchases', data),
   update: (id, data) => api.put(`/purchases/${id}`, data),
   updatePayment: (id, data) => api.patch(`/purchases/${id}/payment`, data),
+  updateOrderStatus: (id, data) => api.patch(`/purchases/${id}/order-status`, data),
+  markAsReceived: (id) => api.post(`/purchases/${id}/receive`),
+  recordPayment: (id, data) => api.post(`/purchases/${id}/record-payment`, data),
+  getPayments: (id) => api.get(`/purchases/${id}/payments`),
   delete: (id) => api.delete(`/purchases/${id}`),
   getPdf: (id) => api.get(`/purchases/${id}/pdf`, { responseType: 'blob' }),
 };
@@ -119,6 +121,8 @@ export const invoiceAPI = {
   create: (data) => api.post('/invoices', data),
   update: (id, data) => api.put(`/invoices/${id}`, data),
   updatePayment: (id, data) => api.patch(`/invoices/${id}/payment`, data),
+  recordPayment: (id, data) => api.post(`/invoices/${id}/record-payment`, data),
+  getPayments: (id) => api.get(`/invoices/${id}/payments`),
   delete: (id) => api.delete(`/invoices/${id}`),
   getPdf: (id) => api.get(`/invoices/${id}/pdf`, { responseType: 'blob' }),
 };
@@ -129,10 +133,10 @@ export const reportAPI = {
   getPurchases: (params) => api.get('/reports/purchases', { params }),
   getProfitLoss: (params) => api.get('/reports/profit-loss', { params }),
   getStock: () => api.get('/reports/stock'),
-  exportSales: (params) => api.get('/reports/sales/export', { params, responseType: 'blob' }),
-  exportPurchases: (params) => api.get('/reports/purchases/export', { params, responseType: 'blob' }),
-  exportProfitLoss: (params) => api.get('/reports/profit-loss/export', { params, responseType: 'blob' }),
-  exportStock: () => api.get('/reports/stock/export', { responseType: 'blob' }),
+  exportSales: (params) => api.get('/reports/export', { params: { ...params, type: 'sales' }, responseType: 'blob' }),
+  exportPurchases: (params) => api.get('/reports/export', { params: { ...params, type: 'purchases' }, responseType: 'blob' }),
+  exportProfitLoss: (params) => api.get('/reports/export', { params: { ...params, type: 'profit-loss' }, responseType: 'blob' }),
+  exportStock: () => api.get('/reports/export', { params: { type: 'stock' }, responseType: 'blob' }),
 };
 
 // Settings APIs

@@ -9,9 +9,13 @@ router.use(authenticate);
 router.get('/', invoiceController.getAllInvoices);
 router.get('/:id', invoiceController.getInvoice);
 router.get('/:id/pdf', invoiceController.downloadInvoicePDF);
+router.get('/:id/payments', invoiceController.getPayments);
 
 router.post('/', invoiceController.createInvoice);
+router.post('/:id/record-payment', invoiceController.recordPayment);
+
 router.patch('/:id/payment', invoiceController.updateInvoicePayment);
+
 router.delete('/:id', authorize('admin'), invoiceController.deleteInvoice);
 
 module.exports = router;
